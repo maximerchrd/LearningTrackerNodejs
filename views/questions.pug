@@ -4,3 +4,15 @@ block content
     include partials/header.pug
     h1= title
     p Here will be some questions for you
+    table(style='width:40%', border='1')
+        thead
+            tr
+                th Question
+                th Question Type
+                th Rating
+        tbody
+            each question in data.questions
+                tr
+                    td=question.questionText
+                    td=question.questionType
+                    td=question.rating
