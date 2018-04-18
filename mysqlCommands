@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS multiple_choice_questions (ID INT NOT NULL AUTO_INCREMENT,
+                                                      LEVEL INT,QUESTION TEXT NOT NULL, OPTION0 TEXT,OPTION1 TEXT,
+                                                      OPTION2 TEXT,OPTION3 TEXT,OPTION4 TEXT ,OPTION5 TEXT,
+                                                      OPTION6 TEXT,OPTION7 TEXT,OPTION8 TEXT,OPTION9 TEXT,
+                                                      NB_CORRECT_ANS INT,IMAGE_PATH TEXT,ID_GLOBAL INT, PRIMARY KEY (ID));

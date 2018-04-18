@@ -29,7 +29,7 @@ router.post('/', function(req, res) {
                 host: 'localhost',
                 user: 'root',
                 password: '',
-                database: 'LearningTracker'
+                database: 'NodeJSLearningTracker'
             });
             con.connect(function(err) {
                 if (err) throw err;
