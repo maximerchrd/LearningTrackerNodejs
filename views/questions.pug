@@ -9,10 +9,13 @@ block content
             tr
                 th Question
                 th Question Type
+                th Picture
                 th Rating
         tbody
             each question in data.questions
                 tr
                     td=question.questionText
                     td=question.questionType
+                    td
+                        img(src="/images/mini_" + question.imageName)
                     td=question.rating

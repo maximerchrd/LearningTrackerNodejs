@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var queryString = require('querystring');
 const mysql = require('mysql');
 var fs = require('fs');
+var sharp = require('sharp');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
@@ -20,9 +21,20 @@ router.post('/', function(req, res) {
 
     var img = imageString;
     var buf = new Buffer(img, 'base64');
-    fs.writeFile("images/" + imageName, buf);
+    fs.writeFile("public/images/" + imageName, buf);
 
     res.send("200");
+
+    sharp(buf)
+        .resize(100, 100, {
+            kernel: sharp.kernel.nearest
+        })
+        .background('white')
+        .embed()
+        .toFile("public/images/mini_" + imageName)
+        .then(function() {
+
+        });
 
     //do mysql stuffs
     var sql = "INSERT INTO multiple_choice_questions (QUESTION, IMAGE_PATH) VALUES ('" + quest +
