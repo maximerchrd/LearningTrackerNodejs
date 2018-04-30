@@ -2,9 +2,7 @@ extends layout
 
 block content
     include partials/header.pug
-    h1= title
-    p Here will be some questions for you
-    table(style='width:40%', border='1')
+    table(style='width:40%', border='1', id='questions_table')
         thead
             tr
                 th Question

@@ -23,3 +23,29 @@ div {
   margin:20px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
+
+#questions_table {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  margin-left: 20px;
+  margin-top: 80px;
+}
+
+#questions_table td, #questions_table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#questions_table tr:nth-child(even){background-color: #ffffff;}
+#questions_table tr:nth-child(odd){background-color: #e6ffe6;}
+
+#questions_table tr:hover {background-color: #ccffcc;}
+
+#questions_table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #00e6a1;
+  color: white;
+}
