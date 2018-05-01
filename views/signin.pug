@@ -2,5 +2,12 @@ extends layout
 
 block content
     include partials/header.pug
-    h1= title
-    p Here you will be able to sign in
+    // register form
+    form(method='POST' action='/signin' class="form")
+        div.form-group
+            label(for='name') User Name:<br/>
+            input#name.form-control(type='text', placeholder='username' name='username')
+        div.form-group
+            label(for='pw') Password:<br/>
+            input#pw.form-control(type='password' name='password')
+        button.btn.btn-primary(type='submit') Sign in

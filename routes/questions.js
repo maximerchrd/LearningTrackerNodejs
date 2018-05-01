@@ -16,7 +16,13 @@ router.get('/', function(req, res, next) {
     var questionsArray = [];
 
     //do mysql stuffs
-    var sql = "SELECT * FROM multiple_choice_questions;"
+    var sql = "";
+    if (req.user) {
+        sql = "SELECT * FROM multiple_choice_questions WHERE ID=1;"
+    } else {
+        sql = "SELECT * FROM multiple_choice_questions;"
+    }
+
     // First you need to create a connection to the db
     const con = mysql.createConnection({
         host: 'localhost',

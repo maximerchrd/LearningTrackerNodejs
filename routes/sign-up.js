@@ -22,7 +22,7 @@ router.post('/', function(req, res) {
             var hashedPassword = bcrypt.hashSync(req.body.password, 12);
 
             //do mysql stuffs
-            var sql = "INSERT INTO users (username, email, password) VALUES ('" + req.body.username +
+            var sql = "INSERT IGNORE INTO users (username, email, password) VALUES ('" + req.body.username +
                 "', '" + req.body.email + "', '" + hashedPassword + "');"
             // First you need to create a connection to the db
             const con = mysql.createConnection({
