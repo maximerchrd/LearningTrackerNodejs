@@ -52,9 +52,19 @@ passport.use(new LocalStrategy(function(username, password, done) {
         });
     }
 ));
-/* GET home page. */
+/* GET sign in page. */
 router.get('/', function(req, res, next) {
-    res.render('signin', { title: 'Sign In' });
+    var signString = ""
+    var signUrl = ""
+    if (req.user) {
+        signString = "Sign Out"
+        signUrl = "signout"
+    } else {
+        signString = "Sign In"
+        signUrl = "signin"
+    }
+    res.render('signin', { sign_in_out: signString, sign_in_out_url: signUrl });
+    next()
 });
 
 module.exports = router;

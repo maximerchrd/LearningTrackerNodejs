@@ -53,7 +53,16 @@ router.post('/', function(req, res) {
 
 /* GET sign up page. */
 router.get('/', function(req, res, next) {
-    res.render('sign-up', { title: 'Sign Up' });
+    var signString = ""
+    var signUrl = ""
+    if (req.user) {
+        signString = "Sign Out"
+        signUrl = "signout"
+    } else {
+        signString = "Sign In"
+        signUrl = "signin"
+    }
+    res.render('sign-up', { sign_in_out: signString, sign_in_out_url: signUrl });
 });
 
 module.exports = router;

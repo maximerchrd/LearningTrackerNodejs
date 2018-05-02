@@ -41,7 +41,17 @@ router.get('/', function(req, res, next) {
                 questionsArray.push(question);
             }
             var data = {questions: questionsArray};
-            res.render('questions', { title: 'Questions', data: data});
+
+            var signString = ""
+            var signUrl = ""
+            if (req.user) {
+                signString = "Sign Out"
+                signUrl = "signout"
+            } else {
+                signString = "Sign In"
+                signUrl = "signin"
+            }
+            res.render('questions', { sign_in_out: signString, sign_in_out_url: signUrl, data: data});
         });
     });
 });
