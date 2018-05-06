@@ -13,15 +13,10 @@ function Question(questionText, questionType, imageName, rating) {
 
 /* GET questions page. */
 router.get('/', function(req, res, next) {
+    var mainSubjects = [];
     var questionsArray = [];
 
     //do mysql stuffs
-    var sql = "";
-    if (req.user) {
-        sql = "SELECT * FROM multiple_choice_questions WHERE ID=1;"
-    } else {
-        sql = "SELECT * FROM multiple_choice_questions;"
-    }
 
     // First you need to create a connection to the db
     const con = mysql.createConnection({
@@ -33,14 +28,27 @@ router.get('/', function(req, res, next) {
     con.connect(function(err) {
         if (err) throw err;
         console.log("Connected!");
-        con.query(sql, function (err, rows) {
+        con.query("SELECT SUBJECT FROM subjects;", function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
-                console.log(rows[i].IMAGE_PATH);
-                var question = new Question(rows[i].QUESTION, "MCQ", rows[i].IMAGE_PATH, 3);
+                mainSubjects.push(rows[i].SUBJECT);
+            }
+
+        });
+        con.query("SELECT * FROM short_answer_questions;", function (err, rows) {
+            if (err) throw err;
+            for (var i in rows) {
+                var question = new Question(rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3);
                 questionsArray.push(question);
             }
-            var data = {questions: questionsArray};
+
+        });
+        con.query("SELECT * FROM multiple_choice_questions;", function (err, rows) {
+            if (err) throw err;
+            for (var i in rows) {
+                var question = new Question(rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3);
+                questionsArray.push(question);
+            }
 
             var signString = ""
             var signUrl = ""
@@ -51,7 +59,10 @@ router.get('/', function(req, res, next) {
                 signString = "Sign In"
                 signUrl = "signin"
             }
-            res.render('questions', { sign_in_out: signString, sign_in_out_url: signUrl, data: data});
+
+            var data = {questions: questionsArray};
+            res.render('questions', { sign_in_out: signString, sign_in_out_url: signUrl, data: data,
+                mainSubjects: mainSubjects});
         });
     });
 });

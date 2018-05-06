@@ -16,11 +16,13 @@ a {
   color: #00B7FF;
 }
 form {
-  padding: 70px 0;
+  padding: 40px 0;
   text-align: center;
 }
-div {
-  margin:20px;
+
+div.form-group {
+  display: inline;
+  margin: 20px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
@@ -28,8 +30,8 @@ div {
   font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
   border-collapse: collapse;
   width: 100%;
-  margin-left: 20px;
-  margin-top: 80px;
+  margin: auto;
+  margin-top: 40px;
 }
 
 #questions_table td, #questions_table th {

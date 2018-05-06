@@ -2,6 +2,18 @@ extends layout
 
 block content
     include partials/header.pug
+    form(method='POST' action='/questions' class="form-inline")
+        div.form-group
+            select
+                each subject in mainSubjects
+                    option(value=subject) #{subject}
+        div.form-group
+            input#keyword.form-control(type='email', placeholder='key word' name='email')
+        div.form-group
+            button.btn.btn-primary(type='submit') Search
+
+
+
     table(style='width:40%', border='1', id='questions_table')
         thead
             tr
