@@ -44,7 +44,7 @@ router.post('/', function(req, res) {
         host: 'localhost',
         user: 'root',
         password: '',
-        database: 'NodeJSLearningTracker'
+        database: 'koeko_website'
     });
     con.connect(function(err) {
         if (err) throw err;

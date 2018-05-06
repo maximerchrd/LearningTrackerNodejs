@@ -28,7 +28,7 @@ router.get('/', function(req, res, next) {
         host: 'localhost',
         user: 'root',
         password: '',
-        database: 'NodeJSLearningTracker'
+        database: 'koeko_website'
     });
     con.connect(function(err) {
         if (err) throw err;
