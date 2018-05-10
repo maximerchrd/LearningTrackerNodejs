@@ -1,4 +1,4 @@
-var express = require('express');
+/*var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 var queryString = require('querystring');
@@ -57,3 +57,4 @@ router.post('/', function(req, res) {
 });
 
 module.exports = router;
+*/

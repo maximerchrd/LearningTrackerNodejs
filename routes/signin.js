@@ -64,7 +64,7 @@ router.get('/', function(req, res, next) {
         signUrl = "signin"
     }
     res.render('signin', { sign_in_out: signString, sign_in_out_url: signUrl });
-    next()
+    //next()
 });
 
 module.exports = router;
