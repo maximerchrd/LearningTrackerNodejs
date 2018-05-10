@@ -5,6 +5,10 @@ block content
     form(method='POST' action='/questions' class="form-inline")
         div.form-group
             select
+                each filter in questSelectedFilter
+                    option(value=filter) #{filter}
+        div.form-group
+            select
                 each subject in mainSubjects
                     option(value=subject) #{subject}
         div.form-group
@@ -21,6 +25,7 @@ block content
                 th Question Type
                 th Picture
                 th Rating
+                th My Questions
         tbody
             each question in data.questions
                 tr
@@ -29,3 +34,5 @@ block content
                     td
                         img(src="/images/mini_" + question.imageName)
                     td=question.rating
+                    td
+                        img(src="/images/" + question.userSelected)
