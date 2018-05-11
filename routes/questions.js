@@ -3,7 +3,8 @@ var router = express.Router();
 const mysql = require('mysql');
 
 //define question object
-function Question(questionText, questionType, imageName, rating, userSelected) {
+function Question(questionID, questionText, questionType, imageName, rating, userSelected) {
+    this.questionID = questionID;
     this.questionText = questionText;
     this.questionType = questionType;
     this.imageName = imageName;
@@ -41,10 +42,10 @@ router.get('/', function(req, res, next) {
             if (err) throw err;
             for (var i in rows) {
                 if (req.user) {
-                    var question = new Question(rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "selected.png");
+                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "selected.png");
                     questionsArray.push(question);
                 } else {
-                    var question = new Question(rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "notselected.png");
+                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "notselected.png");
                     questionsArray.push(question);
                 }
             }
@@ -54,10 +55,10 @@ router.get('/', function(req, res, next) {
             if (err) throw err;
             for (var i in rows) {
                 if (req.user) {
-                    var question = new Question(rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "selected.png");
+                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "selected.png");
                     questionsArray.push(question);
                 } else {
-                    var question = new Question(rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "notselected.png");
+                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "notselected.png");
                     questionsArray.push(question);
                 }
             }
@@ -77,6 +78,12 @@ router.get('/', function(req, res, next) {
                 mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter});
         });
     });
+});
+
+router.post('/', function(req, res, next) {
+    console.log("posted YEAH!")
+    res.send();
+    next()
 });
 
 module.exports = router;

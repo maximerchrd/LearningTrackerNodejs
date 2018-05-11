@@ -17,7 +17,6 @@ block content
             button.btn.btn-primary(type='submit') Search
 
 
-
     table(style='width:40%', border='1', id='questions_table')
         thead
             tr
@@ -35,18 +34,26 @@ block content
                         img(src="/users_images/mini_" + question.imageName)
                     td=question.rating
                     td
-                        img(src="/images/" + question.userSelected)
+                        img(id="checkboxImage" + "1", src="/images/" + question.userSelected)
                     .modal
                         .modal-content
                             span(class="close-button", onclick="toggleModalClose()") &times;
-                            h1.header-one some text
-                            img(src="/users_images/mini_" + question.imageName)
+                            .question-text some text
+                            .question-type some type
+                            img(src="/users_images/", id="questionImage")
+                            button(onclick="selectQuestion()") Select Question
                     script(type='text/javascript').
+                        src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"
                         var modal = document.querySelector(".modal");
                         var closeButton = document.querySelector(".close-button");
-                        var questionsArray = !{JSON.stringify(data.questions)}
 
-                        var header = document.querySelector(".header-one");
+                        var questionsArray = !{JSON.stringify(data.questions)};
+                        var selectedQuestions = [];
+                        var currentQuestionIndex = 0;
+
+                        var question_text = document.querySelector(".question-text");
+                        var question_type = document.querySelector(".question-type");
+                        var questionImage = document.getElementById("questionImage");
 
                         function toggleModal(id) {
                             var index = 0;
@@ -55,11 +62,25 @@ block content
                             } else if (id.rowIndex - 1 < questionsArray.length && id.rowIndex - 1 >= 0) {
                                 index = id.rowIndex - 1;
                             }
-                            header.innerHTML = "smth else: " + questionsArray[index].questionText;
+                            currentQuestionIndex = index;
+                            question_text.innerHTML = questionsArray[index].questionText;
+                            question_type.innerHTML = questionsArray[index].questionType;
+                            questionImage.src = "/users_images/" + questionsArray[index].imageName;
+                            if (questionImage && questionImage.style) {
+                                questionImage.style.height = "300px"
+                            }
                             modal.classList.toggle("show-modal");
                         }
+
                         function toggleModalClose() {
                             modal.classList.toggle("show-modal");
+                        }
+
+                        function selectQuestion() {
+                            selectedQuestions.push(questionsArray[currentQuestionIndex].questionID);
+                            var checkbox = document.getElementById("checkboxImage" + "1");
+                            checkbox.src = "/images/notselected.png"
+                            toggleModalClose();
                         }
 
                         function windowOnClick(event) {
