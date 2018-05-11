@@ -17,6 +17,9 @@ block content
             button.btn.btn-primary(type='submit') Search
 
 
+    form(method='POST' action='/questions' class="form-inline")
+        button(type='submit') Save the selected questions to your account
+
     table(style='width:40%', border='1', id='questions_table')
         thead
             tr
@@ -26,7 +29,7 @@ block content
                 th Rating
                 th My Questions
         tbody
-            each question in data.questions
+            each question, index in data.questions
                 tr(onclick="toggleModal(this)")
                     td=question.questionText
                     td=question.questionType
@@ -34,7 +37,7 @@ block content
                         img(src="/users_images/mini_" + question.imageName)
                     td=question.rating
                     td
-                        img(id="checkboxImage" + "1", src="/images/" + question.userSelected)
+                        img(id="checkboxImage" + index, src="/images/" + question.userSelected)
                     .modal
                         .modal-content
                             span(class="close-button", onclick="toggleModalClose()") &times;
@@ -78,8 +81,7 @@ block content
 
                         function selectQuestion() {
                             selectedQuestions.push(questionsArray[currentQuestionIndex].questionID);
-                            var checkbox = document.getElementById("checkboxImage" + "1");
-                            checkbox.src = "/images/notselected.png"
+                            document.getElementById("checkboxImage" + currentQuestionIndex).src="/images/selected.png";
                             toggleModalClose();
                         }
 
@@ -90,5 +92,3 @@ block content
                         }
                         closeButton.addEventListener("click", toggleModalClose);
                         window.addEventListener("click", windowOnClick);
-
-
