@@ -28,11 +28,46 @@ block content
                 th My Questions
         tbody
             each question in data.questions
-                tr
+                tr(onclick="toggleModal(this)")
                     td=question.questionText
                     td=question.questionType
                     td
-                        img(src="/images/mini_" + question.imageName)
+                        img(src="/users_images/mini_" + question.imageName)
                     td=question.rating
                     td
                         img(src="/images/" + question.userSelected)
+                    .modal
+                        .modal-content
+                            span(class="close-button", onclick="toggleModalClose()") &times;
+                            h1.header-one some text
+                            img(src="/users_images/mini_" + question.imageName)
+                    script(type='text/javascript').
+                        var modal = document.querySelector(".modal");
+                        var closeButton = document.querySelector(".close-button");
+                        var questionsArray = !{JSON.stringify(data.questions)}
+
+                        var header = document.querySelector(".header-one");
+
+                        function toggleModal(id) {
+                            var index = 0;
+                            if (typeof id === 'undefined') {
+                                index = 1;
+                            } else if (id.rowIndex - 1 < questionsArray.length && id.rowIndex - 1 >= 0) {
+                                index = id.rowIndex - 1;
+                            }
+                            header.innerHTML = "smth else: " + questionsArray[index].questionText;
+                            modal.classList.toggle("show-modal");
+                        }
+                        function toggleModalClose() {
+                            modal.classList.toggle("show-modal");
+                        }
+
+                        function windowOnClick(event) {
+                            if (event.target === modal) {
+                                toggleModal();
+                            }
+                        }
+                        closeButton.addEventListener("click", toggleModalClose);
+                        window.addEventListener("click", windowOnClick);
+
+
