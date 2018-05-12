@@ -12,13 +12,13 @@ block content
                 each subject in mainSubjects
                     option(value=subject) #{subject}
         div.form-group
-            input#keyword.form-control(type='email', placeholder='key word' name='email')
+            input#keyword.form-control(type='email', placeholder='key word', name='email')
         div.form-group
             button.btn.btn-primary(type='submit') Search
 
-
-    form(method='POST' action='/questions' class="form-inline")
-        button(type='submit') Save the selected questions to your account
+    form(method='POST' action='/questions' class="form_sign")
+        input(type='text' hidden=true placeholder='username' name='selectedQuestions' value='' id='selectedQuestionsField')
+        button(type='submit') Save the selected questions
 
     table(style='width:40%', border='1', id='questions_table')
         thead
@@ -51,7 +51,7 @@ block content
                         var closeButton = document.querySelector(".close-button");
 
                         var questionsArray = !{JSON.stringify(data.questions)};
-                        var selectedQuestions = [];
+                        var selectedQuestions = [[]];
                         var currentQuestionIndex = 0;
 
                         var question_text = document.querySelector(".question-text");
@@ -80,8 +80,13 @@ block content
                         }
 
                         function selectQuestion() {
-                            selectedQuestions.push(questionsArray[currentQuestionIndex].questionID);
+                            if (questionsArray[currentQuestionIndex].questionType == "Short Answer") {
+                                selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "SRTA"]);
+                            } else {
+                                selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "MLCQ"]);
+                            }
                             document.getElementById("checkboxImage" + currentQuestionIndex).src="/images/selected.png";
+                            document.getElementById('selectedQuestionsField').value = selectedQuestions;
                             toggleModalClose();
                         }
 
