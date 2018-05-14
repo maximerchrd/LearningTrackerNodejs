@@ -49,7 +49,6 @@ router.get('/', function (req, res, next) {
             for (var i in rows) {
                 mainSubjects.push(rows[i].SUBJECT);
             }
-
         });
 
         //get the relations between questions and user
@@ -59,7 +58,6 @@ router.get('/', function (req, res, next) {
                 for (var i in rows) {
                     resourceIdsForUser.push(rows[i].IDENTIFIER_RESOURCE)
                 }
-
             });
         }
 
@@ -127,6 +125,16 @@ router.post('/', function (req, res) {
             mcqQuery += "INNER JOIN `relation_question_subject` ON `multiple_choice_questions`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
                 "INNER JOIN `subjects` ON `relation_question_subject`.`IDENTIFIER_SUBJECT` = `subjects`.`IDENTIFIER` " +
                 "WHERE `subjects`.`SUBJECT` = '" + req.body.subjectFilter + "' ";
+
+            if (req.body.keyword != "") {
+                shrtaqQuery += "AND QUESTION LIKE '%" + req.body.keyword + "%' ";
+                mcqQuery += "AND QUESTION LIKE '%" + req.body.keyword + "%' ";
+            }
+        }
+
+        if (req.body.subjectFilter == "All subjects" && req.body.keyword != "") {
+            shrtaqQuery += "WHERE QUESTION LIKE '%" + req.body.keyword + "%' ";
+            mcqQuery += "WHERE QUESTION LIKE '%" + req.body.keyword + "%' ";
         }
 
 
