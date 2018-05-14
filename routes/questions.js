@@ -40,7 +40,6 @@ router.get('/', function(req, res, next) {
     });
     con.connect(function(err) {
         if (err) throw err;
-        console.log("Connected!");
         con.query("SELECT SUBJECT FROM subjects;", function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
@@ -49,28 +48,22 @@ router.get('/', function(req, res, next) {
 
         });
 
-        //get the  relations between questions and user
+        //get the relations between questions and user
+        var resourceIdsForUser  = [];
         if (req.user) {
-            var userID = ""
-            
-            con.query("SELECT * FROM short_answer_questions;", function (err, rows) {
+            con.query("SELECT * FROM relation_resource_user WHERE IDENTIFIER_USER='" + req.user + "';", function (err, rows) {
                 if (err) throw err;
                 for (var i in rows) {
-                    if (req.user) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "selected.png");
-                        questionsArray.push(question);
-                    } else {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "notselected.png");
-                        questionsArray.push(question);
-                    }
+                    resourceIdsForUser.push(rows[i].IDENTIFIER_RESOURCE)
                 }
 
             });
         }
+
         con.query("SELECT * FROM short_answer_questions;", function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
-                if (req.user) {
+                if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                     var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "selected.png");
                     questionsArray.push(question);
                 } else {
@@ -78,12 +71,12 @@ router.get('/', function(req, res, next) {
                     questionsArray.push(question);
                 }
             }
-
         });
+
         con.query("SELECT * FROM multiple_choice_questions;", function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
-                if (req.user) {
+                if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                     var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "selected.png");
                     questionsArray.push(question);
                 } else {
@@ -122,7 +115,7 @@ router.post('/', function(req, res) {
     }
     console.log(questions)
     for (i = 0; i < questions.length; i++) {
-        questions[i].push("someUserID")
+        questions[i].push(req.user)
         questions[i].push(date.getDate())
     }
     //do mysql stuffs
@@ -134,16 +127,19 @@ router.post('/', function(req, res) {
         password: '',
         database: 'koeko_website'
     });
-    con.connect(function(err) {
-        if (err) throw err;
-        console.log("Connected!");
 
-        var sql = "INSERT INTO relation_resource_user (IDENTIFIER_RESOURCE, RESOURCE_TYPE, IDENTIFIER_USER, MODIF_DATE) VALUES ?";
-        con.query(sql, [questions], function (err, result) {
+    if (questions.length > 0) {
+        con.connect(function (err) {
             if (err) throw err;
-            console.log("Number of records inserted: " + result.affectedRows);
+            console.log("Connected!");
+
+            var sql = "INSERT INTO relation_resource_user (IDENTIFIER_RESOURCE, RESOURCE_TYPE, IDENTIFIER_USER, MODIF_DATE) VALUES ?";
+            con.query(sql, [questions], function (err, result) {
+                if (err) throw err;
+                console.log("Number of records inserted: " + result.affectedRows);
+            });
         });
-    });
+    }
 
     //change the user selection for the corresponding questions in array
     var questionIDs = []

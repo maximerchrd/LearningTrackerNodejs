@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS short_answer_questions (ID INT NOT NULL AUTO_INCREMEN
     PRIMARY KEY (ID));
 
 CREATE TABLE IF NOT EXISTS users (ID INT NOT NULL AUTO_INCREMENT,
+    IDENTIFIER VARCHAR(15),
     username VARCHAR(30) NOT NULL,
     email VARCHAR(50),
     password VARCHAR(100) NOT NULL,
@@ -164,4 +165,4 @@ VALUES("123456789101237","123456789101236");
 INSERT INTO relation_question_objective (IDENTIFIER_QUESTION,IDENTIFIER_LEARNING_OBJECTIVE)
 VALUES("123456789101230","123456789101235");
 
-INSERT INTO users(username,email,password) VALUES ("Ali Baba", "alibaba@mail.com","$2a$12$8.qr34yWBP9SNWF5dl4ji.SRpbrxstLQMUsP1C8az1x7b6N00t3/q");
+INSERT INTO users(IDENTIFIER, username,email,password) VALUES ("AJDkdneDqwifhdn", "Ali Baba", "alibaba@mail.com","$2a$12$8.qr34yWBP9SNWF5dl4ji.SRpbrxstLQMUsP1C8az1x7b6N00t3/q");

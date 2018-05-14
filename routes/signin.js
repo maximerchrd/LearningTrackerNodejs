@@ -9,19 +9,21 @@ const mysql = require('mysql');
 /* POST login. */
 
 router.post('/',
-    passport.authenticate('local', { successRedirect: '/',
+    passport.authenticate('local', {
+        successRedirect: '/',
         failureRedirect: '/signin',
-        failureFlash: true })
+        failureFlash: true
+    })
 );
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
     done(null, user);
 });
 
-passport.deserializeUser(function(user, done) {
+passport.deserializeUser(function (user, done) {
     done(null, user);
 });
-passport.use(new LocalStrategy(function(username, password, done) {
-        var dbPassword="";
+passport.use(new LocalStrategy(function (username, password, done) {
+        var dbPassword = "";
 
         //do mysql stuffs
         var sql = "SELECT * FROM users WHERE username='" + username + "';"
@@ -32,19 +34,19 @@ passport.use(new LocalStrategy(function(username, password, done) {
             password: '',
             database: 'koeko_website'
         });
-        con.connect(function(err) {
+        con.connect(function (err) {
             if (err) throw err;
-            console.log("Connected!");
             con.query(sql, function (err, rows) {
                 if (err) throw err;
-                rows.forEach(function(row) {
-                    dbPassword=row.password;
+                rows.forEach(function (row) {
+                    dbPassword = row.password;
+                    var identifier = row.IDENTIFIER;
                     bcrypt.compare(password, dbPassword, function (err, res) {
                         if (err) return done(err);
                         if (res === false) {
-                            return done(null, false);
+                            return done(null, "");
                         } else {
-                            return done(null, true);
+                            return done(null, identifier);
                         }
                     });
                 });
@@ -53,7 +55,7 @@ passport.use(new LocalStrategy(function(username, password, done) {
     }
 ));
 /* GET sign in page. */
-router.get('/', function(req, res, next) {
+router.get('/', function (req, res, next) {
     var signString = ""
     var signUrl = ""
     if (req.user) {
@@ -63,7 +65,7 @@ router.get('/', function(req, res, next) {
         signString = "Sign In"
         signUrl = "signin"
     }
-    res.render('signin', { sign_in_out: signString, sign_in_out_url: signUrl });
+    res.render('signin', {sign_in_out: signString, sign_in_out_url: signUrl});
     //next()
 });
 
