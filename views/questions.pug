@@ -4,22 +4,22 @@ block content
     include partials/header.pug
     form(method='POST' action='/questions' class="form-inline")
         div.form-group
-            select
+            select(id='userQuestionsCombobox')
                 each filter in questSelectedFilter
                     option(value=filter) #{filter}
         div.form-group
-            select
+            select(name='subjectFilter')
                 each subject in mainSubjects
                     option(value=subject) #{subject}
         div.form-group
-            input#keyword.form-control(type='email', placeholder='key word', name='email')
+            input#keyword.form-control(type='keyword', placeholder='key word', name='keyword')
         div.form-group
             button.btn.btn-primary(type='submit') Search
 
     form(method='POST' action='/questions' class="form_sign")
         input(type='text' hidden=true placeholder='username' name='selectedQuestions' value='' id='selectedQuestionsField')
         input(type='text' hidden=true placeholder='username' name='unselectedQuestions' value='' id='unselectedQuestionsField')
-        button(type='submit') Save the selected questions
+        button(type='submit', id='saveChangesButton') Save my Changes
 
     table(style='width:40%', border='1', id='questions_table')
         thead
@@ -49,8 +49,9 @@ block content
                     script(type='text/javascript').
                         src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"
                         var modal = document.querySelector(".modal");
-                        var closeButton = document.querySelector(".close-button");
                         var selectButton = document.querySelector(".button-select");
+                        var saveButton = document.getElementById("saveChangesButton");
+                        var userQuesCombo = document.getElementById("userQuestionsCombobox");
 
                         var questionsArray = !{JSON.stringify(data.questions)};
                         var selectedQuestions = [[]];
@@ -60,6 +61,13 @@ block content
                         var question_text = document.querySelector(".question-text");
                         var question_type = document.querySelector(".question-type");
                         var questionImage = document.getElementById("questionImage");
+
+                        var numberofcloses = 0;
+
+                        if (!{JSON.stringify(data.currentUser)} == "") {
+                            userQuesCombo.disabled = true;
+                            saveButton.disabled = true;
+                        }
 
                         function toggleModal(id) {
                             var index = 0;
@@ -139,5 +147,4 @@ block content
                                 toggleModal();
                             }
                         }
-                        closeButton.addEventListener("click", toggleModalClose);
                         window.addEventListener("click", windowOnClick);

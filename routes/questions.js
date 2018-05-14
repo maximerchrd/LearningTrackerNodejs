@@ -6,8 +6,9 @@ router.use(bodyParser.urlencoded({extended: false}));
 router.use(bodyParser.json());
 
 var questSelectedFilter = ["All questions", "My questions", "Other questions"];
-var mainSubjects = [];
+var mainSubjects = ["All subjects"];
 var questionsArray = [];
+var resourceIdsForUser = [];
 var signString = ""
 var signUrl = ""
 var data;
@@ -41,6 +42,8 @@ router.get('/', function (req, res, next) {
     });
     con.connect(function (err) {
         if (err) throw err;
+        //reinitialize array
+        mainSubjects = ["All subjects"];
         con.query("SELECT SUBJECT FROM subjects;", function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
@@ -50,7 +53,6 @@ router.get('/', function (req, res, next) {
         });
 
         //get the relations between questions and user
-        var resourceIdsForUser = [];
         if (req.user) {
             con.query("SELECT * FROM relation_resource_user WHERE IDENTIFIER_USER='" + req.user + "';", function (err, rows) {
                 if (err) throw err;
@@ -64,7 +66,7 @@ router.get('/', function (req, res, next) {
         con.query("SELECT * FROM short_answer_questions;", function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
-                if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
+                if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                     var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "selected.png");
                     questionsArray.push(question);
                 } else {
@@ -77,7 +79,7 @@ router.get('/', function (req, res, next) {
         con.query("SELECT * FROM multiple_choice_questions;", function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
-                if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
+                if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                     var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "selected.png");
                     questionsArray.push(question);
                 } else {
@@ -109,94 +111,173 @@ router.get('/', function (req, res, next) {
 router.post('/', function (req, res) {
     console.log(req.body)
 
-    //parse the post request to a 2d array for selected questions
-    var date = new Date();
-    var questionsNotParsed = req.body.selectedQuestions.split(",")
-    questionsNotParsed.shift()
-    var questions = [];
-    var i;
-    for (i = 0; (i + 1) < questionsNotParsed.length; i = i + 2) {
-        questions.push([questionsNotParsed[i], questionsNotParsed[i + 1]])
-    }
-    console.log(questions)
-    for (i = 0; i < questions.length; i++) {
-        questions[i].push(req.user)
-        questions[i].push(date.getDate())
-    }
+    if (req.body.subjectFilter) {
+        //handle search request
+        console.log("search request");
+        //reinit question array
+        questionsArray = [];
+        var shrtaqQuery = "SELECT * FROM short_answer_questions ";
+        var mcqQuery = "SELECT * FROM multiple_choice_questions ";
 
-    //parse the post request to an array for unselected questions
-    var questionsUnselected = req.body.unselectedQuestions.split(",")
-
-
-    //do mysql stuffs
-
-    // First you need to create a connection to the db
-    const con = mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'koeko_website'
-    });
-
-
-    con.connect(function (err) {
-        if (err) throw err;
-
-        if (questions.length > 0) {
-            var sql = "INSERT INTO relation_resource_user (IDENTIFIER_RESOURCE, RESOURCE_TYPE, IDENTIFIER_USER, MODIF_DATE) VALUES ?";
-            con.query(sql, [questions], function (err, result) {
-                if (err) throw err;
-                console.log("Number of records inserted: " + result.affectedRows);
-            });
+        console.log(req.body.subjectFilter)
+        if (req.body.subjectFilter != "All subjects") {
+            shrtaqQuery += "INNER JOIN `relation_question_subject` ON `short_answer_questions`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
+            "INNER JOIN `subjects` ON `relation_question_subject`.`IDENTIFIER_SUBJECT` = `subjects`.`IDENTIFIER` " +
+            "WHERE `subjects`.`SUBJECT` = '" + req.body.subjectFilter + "' ";
+            mcqQuery += "INNER JOIN `relation_question_subject` ON `multiple_choice_questions`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
+                "INNER JOIN `subjects` ON `relation_question_subject`.`IDENTIFIER_SUBJECT` = `subjects`.`IDENTIFIER` " +
+                "WHERE `subjects`.`SUBJECT` = '" + req.body.subjectFilter + "' ";
         }
 
-        if (questionsUnselected.length > 0 && questionsUnselected[0] != "") {
-            var i;
-            for (i = 0; i < questionsUnselected.length; i++) {
-                var sql = "DELETE FROM relation_resource_user WHERE IDENTIFIER_RESOURCE='" + questionsUnselected[i] + "' AND IDENTIFIER_USER='" + req.user + "';";
-                con.query(sql, function (err, result) {
+
+        //do mysql stuffs
+
+        // First you need to create a connection to the db
+        const con = mysql.createConnection({
+            host: 'localhost',
+            user: 'root',
+            password: '',
+            database: 'koeko_website'
+        });
+        con.connect(function (err) {
+            if (err) throw err;
+
+            con.query(shrtaqQuery, function (err, rows) {
+                if (err) throw err;
+                for (var i in rows) {
+                    if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "selected.png");
+                        questionsArray.push(question);
+                    } else {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "notselected.png");
+                        questionsArray.push(question);
+                    }
+                }
+            });
+
+            con.query(mcqQuery, function (err, rows) {
+                if (err) throw err;
+                for (var i in rows) {
+                    if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "selected.png");
+                        questionsArray.push(question);
+                    } else {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "notselected.png");
+                        questionsArray.push(question);
+                    }
+                }
+
+
+                if (req.user) {
+                    signString = "Sign Out"
+                    signUrl = "signout"
+                    currentUser = req.user
+                } else {
+                    signString = "Sign In"
+                    signUrl = "signin"
+                    currentUser = ""
+                }
+
+                data = {questions: questionsArray, currentUser: currentUser};
+                res.render('questions', {
+                    sign_in_out: signString, sign_in_out_url: signUrl, data: data,
+                    mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
+                });
+            });
+        });
+    } else {
+        //handle save changes request
+        console.log("posted Save my Changes")
+
+        //parse the post request to a 2d array for selected questions
+        var date = new Date();
+        var questionsNotParsed = req.body.selectedQuestions.split(",")
+        questionsNotParsed.shift()
+        var questions = [];
+        var i;
+        for (i = 0; (i + 1) < questionsNotParsed.length; i = i + 2) {
+            questions.push([questionsNotParsed[i], questionsNotParsed[i + 1]])
+        }
+        console.log(questions)
+        for (i = 0; i < questions.length; i++) {
+            questions[i].push(req.user)
+            questions[i].push(date.getDate())
+        }
+
+        //parse the post request to an array for unselected questions
+        var questionsUnselected = req.body.unselectedQuestions.split(",")
+
+
+        //do mysql stuffs
+
+        // First you need to create a connection to the db
+        const con = mysql.createConnection({
+            host: 'localhost',
+            user: 'root',
+            password: '',
+            database: 'koeko_website'
+        });
+
+
+        con.connect(function (err) {
+            if (err) throw err;
+
+            if (questions.length > 0) {
+                var sql = "INSERT INTO relation_resource_user (IDENTIFIER_RESOURCE, RESOURCE_TYPE, IDENTIFIER_USER, MODIF_DATE) VALUES ?";
+                con.query(sql, [questions], function (err, result) {
                     if (err) throw err;
-                    console.log("Number of records deleted: " + result.affectedRows);
+                    console.log("Number of records inserted: " + result.affectedRows);
                 });
             }
+
+            if (questionsUnselected.length > 0 && questionsUnselected[0] != "") {
+                var i;
+                for (i = 0; i < questionsUnselected.length; i++) {
+                    var sql = "DELETE FROM relation_resource_user WHERE IDENTIFIER_RESOURCE='" + questionsUnselected[i] + "' AND IDENTIFIER_USER='" + req.user + "';";
+                    con.query(sql, function (err, result) {
+                        if (err) throw err;
+                        console.log("Number of records deleted: " + result.affectedRows);
+                    });
+                }
+            }
+        });
+
+
+        //change the user selection for the corresponding questions in array
+        var questionIDs = []
+        var i;
+        for (i = 0; i < questions.length; i++) {
+            questionIDs.push(questions[i][0])
         }
-    });
-
-
-    //change the user selection for the corresponding questions in array
-    var questionIDs = []
-    var i;
-    for (i = 0; i < questions.length; i++) {
-        questionIDs.push(questions[i][0])
-    }
-    for (i = 0; i < questionsArray.length; i++) {
-        if (questionIDs.indexOf(questionsArray[i].questionID) != -1) {
-            questionsArray[i].userSelected = "selected.png"
+        for (i = 0; i < questionsArray.length; i++) {
+            if (questionIDs.indexOf(questionsArray[i].questionID) != -1) {
+                questionsArray[i].userSelected = "selected.png"
+            }
         }
-    }
-    //same for unselected questions
-    var questionIDsUnselected = []
-    for (i = 0; i < questionsUnselected.length; i++) {
-        questionIDsUnselected.push(questionsUnselected[i])
-    }
-    for (i = 0; i < questionsArray.length; i++) {
-        if (questionIDsUnselected.indexOf(questionsArray[i].questionID) != -1) {
-            questionsArray[i].userSelected = "notselected.png"
+        //same for unselected questions
+        var questionIDsUnselected = []
+        for (i = 0; i < questionsUnselected.length; i++) {
+            questionIDsUnselected.push(questionsUnselected[i])
         }
-    }
+        for (i = 0; i < questionsArray.length; i++) {
+            if (questionIDsUnselected.indexOf(questionsArray[i].questionID) != -1) {
+                questionsArray[i].userSelected = "notselected.png"
+            }
+        }
 
-    //sets empty string in case user is undefined
-    if (req.user) {
-        currentUser = req.user
-    } else {
-        currentUser = ""
-    }
+        //sets empty string in case user is undefined
+        if (req.user) {
+            currentUser = req.user
+        } else {
+            currentUser = ""
+        }
 
-    data = {questions: questionsArray, currentUser: currentUser};
-    res.render('questions', {
-        sign_in_out: signString, sign_in_out_url: signUrl, data: data,
-        mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
-    });
+        data = {questions: questionsArray, currentUser: currentUser};
+        res.render('questions', {
+            sign_in_out: signString, sign_in_out_url: signUrl, data: data,
+            mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
+        });
+    }
 });
 
 module.exports = router;
