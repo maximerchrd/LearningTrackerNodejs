@@ -127,6 +127,7 @@ router.post('/', function (req, res) {
     //parse the post request to an array for unselected questions
     var questionsUnselected = req.body.unselectedQuestions.split(",")
 
+
     //do mysql stuffs
 
     // First you need to create a connection to the db

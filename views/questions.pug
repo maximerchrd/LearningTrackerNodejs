@@ -79,7 +79,9 @@ block content
                                 selectButton.disabled = true;
                             } else {
                                 if (questionsArray[index].userSelected == "selected.png") {
-                                    selectButton.innerHTML = "Unselect question"
+                                    selectButton.innerHTML = "Unselect Question"
+                                } else {
+                                    selectButton.innerHTML = "Select Question"
                                 }
                             }
                             modal.classList.toggle("show-modal");
@@ -91,18 +93,43 @@ block content
 
                         function selectQuestion() {
                             if (questionsArray[currentQuestionIndex].userSelected == "notselected.png") {
-                                if (questionsArray[currentQuestionIndex].questionType == "Short Answer") {
-                                    selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "SRTA"]);
+                                questionsArray[currentQuestionIndex].userSelected = "selected.png"
+
+                                //if the question was unselected without saving inbetween, remove it from the unselectedQuestions array
+                                if (unselectedQuestions.indexOf(questionsArray[currentQuestionIndex].questionID) != -1) {
+                                    var indexToRemove = unselectedQuestions.indexOf(questionsArray[currentQuestionIndex].questionID);
+                                    unselectedQuestions.splice(indexToRemove, 1)
                                 } else {
-                                    selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "MLCQ"]);
+                                    if (questionsArray[currentQuestionIndex].questionType == "Short Answer") {
+                                        selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "SRTA"]);
+                                    } else {
+                                        selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "MLCQ"]);
+                                    }
                                 }
                                 document.getElementById("checkboxImage" + currentQuestionIndex).src = "/images/selected.png";
                                 document.getElementById('selectedQuestionsField').value = selectedQuestions;
+                                document.getElementById('unselectedQuestionsField').value = unselectedQuestions;
                             } else {
-                                unselectedQuestions.push(questionsArray[currentQuestionIndex].questionID);
+                                questionsArray[currentQuestionIndex].userSelected = "notselected.png"
+
+                                //if the question was selected without saving inbetween, remove it from the questions array
+                                var i;
+                                var indexToRemove = -1;
+                                for (i = 0; i < selectedQuestions.length && indexToRemove == -1; i++) {
+                                    if (selectedQuestions[i][0] == questionsArray[currentQuestionIndex].questionID) {
+                                        indexToRemove = i;
+                                    }
+                                }
+
+                                if (indexToRemove != -1) {
+                                    selectedQuestions.splice(indexToRemove,1);
+                                } else {
+                                    unselectedQuestions.push(questionsArray[currentQuestionIndex].questionID);
+                                }
 
                                 document.getElementById("checkboxImage" + currentQuestionIndex).src = "/images/notselected.png";
                                 document.getElementById('unselectedQuestionsField').value = unselectedQuestions;
+                                document.getElementById('selectedQuestionsField').value = selectedQuestions;
                             }
                             toggleModalClose();
                         }
