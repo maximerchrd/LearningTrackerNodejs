@@ -154,11 +154,19 @@ router.post('/', function (req, res) {
                 if (err) throw err;
                 for (var i in rows) {
                     if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "selected.png");
-                        questionsArray.push(question);
+                        if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
+                            if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "My questions") {
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "selected.png");
+                                questionsArray.push(question);
+                            }
+                        }
                     } else {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "notselected.png");
-                        questionsArray.push(question);
+                        if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "Other questions") {
+                            if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "Other questions") {
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "notselected.png");
+                                questionsArray.push(question);
+                            }
+                        }
                     }
                 }
             });
@@ -167,11 +175,17 @@ router.post('/', function (req, res) {
                 if (err) throw err;
                 for (var i in rows) {
                     if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "selected.png");
-                        questionsArray.push(question);
+                        if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
+                            if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "My questions") {
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "selected.png");
+                                questionsArray.push(question);
+                            }
+                        }
                     } else {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "notselected.png");
-                        questionsArray.push(question);
+                        if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "Other questions") {
+                            var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "notselected.png");
+                            questionsArray.push(question);
+                        }
                     }
                 }
 

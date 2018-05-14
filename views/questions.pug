@@ -4,7 +4,7 @@ block content
     include partials/header.pug
     form(method='POST' action='/questions' class="form-inline")
         div.form-group
-            select(id='userQuestionsCombobox')
+            select(name='selectionFilter', id='userQuestionsCombobox')
                 each filter in questSelectedFilter
                     option(value=filter) #{filter}
         div.form-group
