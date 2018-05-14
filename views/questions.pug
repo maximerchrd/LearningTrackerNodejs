@@ -18,6 +18,7 @@ block content
 
     form(method='POST' action='/questions' class="form_sign")
         input(type='text' hidden=true placeholder='username' name='selectedQuestions' value='' id='selectedQuestionsField')
+        input(type='text' hidden=true placeholder='username' name='unselectedQuestions' value='' id='unselectedQuestionsField')
         button(type='submit') Save the selected questions
 
     table(style='width:40%', border='1', id='questions_table')
@@ -44,14 +45,16 @@ block content
                             .question-text some text
                             .question-type some type
                             img(src="/users_images/", id="questionImage")
-                            button(onclick="selectQuestion()") Select Question
+                            button.button-select(onclick="selectQuestion()") Select Question
                     script(type='text/javascript').
                         src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"
                         var modal = document.querySelector(".modal");
                         var closeButton = document.querySelector(".close-button");
+                        var selectButton = document.querySelector(".button-select");
 
                         var questionsArray = !{JSON.stringify(data.questions)};
                         var selectedQuestions = [[]];
+                        var unselectedQuestions = [];
                         var currentQuestionIndex = 0;
 
                         var question_text = document.querySelector(".question-text");
@@ -72,6 +75,13 @@ block content
                             if (questionImage && questionImage.style) {
                                 questionImage.style.height = "300px"
                             }
+                            if (!{JSON.stringify(data.currentUser)} == "") {
+                                selectButton.disabled = true;
+                            } else {
+                                if (questionsArray[index].userSelected == "selected.png") {
+                                    selectButton.innerHTML = "Unselect question"
+                                }
+                            }
                             modal.classList.toggle("show-modal");
                         }
 
@@ -80,13 +90,20 @@ block content
                         }
 
                         function selectQuestion() {
-                            if (questionsArray[currentQuestionIndex].questionType == "Short Answer") {
-                                selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "SRTA"]);
+                            if (questionsArray[currentQuestionIndex].userSelected == "notselected.png") {
+                                if (questionsArray[currentQuestionIndex].questionType == "Short Answer") {
+                                    selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "SRTA"]);
+                                } else {
+                                    selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "MLCQ"]);
+                                }
+                                document.getElementById("checkboxImage" + currentQuestionIndex).src = "/images/selected.png";
+                                document.getElementById('selectedQuestionsField').value = selectedQuestions;
                             } else {
-                                selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "MLCQ"]);
+                                unselectedQuestions.push(questionsArray[currentQuestionIndex].questionID);
+
+                                document.getElementById("checkboxImage" + currentQuestionIndex).src = "/images/notselected.png";
+                                document.getElementById('unselectedQuestionsField').value = unselectedQuestions;
                             }
-                            document.getElementById("checkboxImage" + currentQuestionIndex).src="/images/selected.png";
-                            document.getElementById('selectedQuestionsField').value = selectedQuestions;
                             toggleModalClose();
                         }
 

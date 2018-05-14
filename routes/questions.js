@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 const mysql = require('mysql');
 var bodyParser = require('body-parser');
-router.use(bodyParser.urlencoded({ extended: false }));
+router.use(bodyParser.urlencoded({extended: false}));
 router.use(bodyParser.json());
 
 var questSelectedFilter = ["All questions", "My questions", "Other questions"];
@@ -11,6 +11,7 @@ var questionsArray = [];
 var signString = ""
 var signUrl = ""
 var data;
+var currentUser = "";
 
 //define question object
 function Question(questionID, questionText, questionType, imageName, rating, userSelected) {
@@ -24,7 +25,7 @@ function Question(questionID, questionText, questionType, imageName, rating, use
 
 
 /* GET questions page. */
-router.get('/', function(req, res, next) {
+router.get('/', function (req, res, next) {
     //reinit question array
     questionsArray = [];
 
@@ -38,7 +39,7 @@ router.get('/', function(req, res, next) {
         password: '',
         database: 'koeko_website'
     });
-    con.connect(function(err) {
+    con.connect(function (err) {
         if (err) throw err;
         con.query("SELECT SUBJECT FROM subjects;", function (err, rows) {
             if (err) throw err;
@@ -49,7 +50,7 @@ router.get('/', function(req, res, next) {
         });
 
         //get the relations between questions and user
-        var resourceIdsForUser  = [];
+        var resourceIdsForUser = [];
         if (req.user) {
             con.query("SELECT * FROM relation_resource_user WHERE IDENTIFIER_USER='" + req.user + "';", function (err, rows) {
                 if (err) throw err;
@@ -89,35 +90,43 @@ router.get('/', function(req, res, next) {
             if (req.user) {
                 signString = "Sign Out"
                 signUrl = "signout"
+                currentUser = req.user
             } else {
                 signString = "Sign In"
                 signUrl = "signin"
+                currentUser = ""
             }
 
-            data = {questions: questionsArray};
-            res.render('questions', { sign_in_out: signString, sign_in_out_url: signUrl, data: data,
-                mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter});
+            data = {questions: questionsArray, currentUser: currentUser};
+            res.render('questions', {
+                sign_in_out: signString, sign_in_out_url: signUrl, data: data,
+                mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
+            });
         });
     });
 });
 
-router.post('/', function(req, res) {
+router.post('/', function (req, res) {
     console.log(req.body)
 
-    //parse the post request to a 2d array
+    //parse the post request to a 2d array for selected questions
     var date = new Date();
     var questionsNotParsed = req.body.selectedQuestions.split(",")
     questionsNotParsed.shift()
     var questions = [];
     var i;
     for (i = 0; (i + 1) < questionsNotParsed.length; i = i + 2) {
-        questions.push([questionsNotParsed[i], questionsNotParsed[i+1]])
+        questions.push([questionsNotParsed[i], questionsNotParsed[i + 1]])
     }
     console.log(questions)
     for (i = 0; i < questions.length; i++) {
         questions[i].push(req.user)
         questions[i].push(date.getDate())
     }
+
+    //parse the post request to an array for unselected questions
+    var questionsUnselected = req.body.unselectedQuestions.split(",")
+
     //do mysql stuffs
 
     // First you need to create a connection to the db
@@ -128,18 +137,30 @@ router.post('/', function(req, res) {
         database: 'koeko_website'
     });
 
-    if (questions.length > 0) {
-        con.connect(function (err) {
-            if (err) throw err;
-            console.log("Connected!");
 
+    con.connect(function (err) {
+        if (err) throw err;
+
+        if (questions.length > 0) {
             var sql = "INSERT INTO relation_resource_user (IDENTIFIER_RESOURCE, RESOURCE_TYPE, IDENTIFIER_USER, MODIF_DATE) VALUES ?";
             con.query(sql, [questions], function (err, result) {
                 if (err) throw err;
                 console.log("Number of records inserted: " + result.affectedRows);
             });
-        });
-    }
+        }
+
+        if (questionsUnselected.length > 0 && questionsUnselected[0] != "") {
+            var i;
+            for (i = 0; i < questionsUnselected.length; i++) {
+                var sql = "DELETE FROM relation_resource_user WHERE IDENTIFIER_RESOURCE='" + questionsUnselected[i] + "' AND IDENTIFIER_USER='" + req.user + "';";
+                con.query(sql, function (err, result) {
+                    if (err) throw err;
+                    console.log("Number of records deleted: " + result.affectedRows);
+                });
+            }
+        }
+    });
+
 
     //change the user selection for the corresponding questions in array
     var questionIDs = []
@@ -152,9 +173,29 @@ router.post('/', function(req, res) {
             questionsArray[i].userSelected = "selected.png"
         }
     }
-    data = {questions: questionsArray};
-    res.render('questions', { sign_in_out: signString, sign_in_out_url: signUrl, data: data,
-        mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter});
+    //same for unselected questions
+    var questionIDsUnselected = []
+    for (i = 0; i < questionsUnselected.length; i++) {
+        questionIDsUnselected.push(questionsUnselected[i])
+    }
+    for (i = 0; i < questionsArray.length; i++) {
+        if (questionIDsUnselected.indexOf(questionsArray[i].questionID) != -1) {
+            questionsArray[i].userSelected = "notselected.png"
+        }
+    }
+
+    //sets empty string in case user is undefined
+    if (req.user) {
+        currentUser = req.user
+    } else {
+        currentUser = ""
+    }
+
+    data = {questions: questionsArray, currentUser: currentUser};
+    res.render('questions', {
+        sign_in_out: signString, sign_in_out_url: signUrl, data: data,
+        mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
+    });
 });
 
 module.exports = router;
