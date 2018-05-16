@@ -45,6 +45,18 @@ block content
                             .question-text some text
                             .question-type some type
                             img(src="/users_images/", id="questionImage")
+                            div(class='stars') Average rating:
+                                span(class="star" id="star1")
+                                span(class="star" id="star2")
+                                span(class="star" id="star3")
+                                span(class="star" id="star4")
+                                span(class="star" id="star5")
+                            div(class='stars') Your rating:
+                                span(class="star" id="ustar1")
+                                span(class="star" id="ustar2")
+                                span(class="star" id="ustar3")
+                                span(class="star" id="ustar4")
+                                span(class="star" id="ustar5")
                             button.button-select(onclick="selectQuestion()") Select Question
                     script(type='text/javascript').
                         src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"
@@ -92,6 +104,24 @@ block content
                                     selectButton.innerHTML = "Select Question"
                                 }
                             }
+
+                            //set the average rating
+                            if (questionsArray[index].rating >= 1) {
+                                document.getElementById('star1').className = 'star on';
+                            }
+                            if (questionsArray[index].rating >= 2) {
+                                document.getElementById('star2').className = 'star on';
+                            }
+                            if (questionsArray[index].rating >= 3) {
+                                document.getElementById('star3').className = 'star on';
+                            }
+                            if (questionsArray[index].rating >= 4) {
+                                document.getElementById('star4').className = 'star on';
+                            }
+                            if (questionsArray[index].rating >= 5) {
+                                document.getElementById('star5').className = 'star on';
+                            }
+
                             modal.classList.toggle("show-modal");
                         }
 
