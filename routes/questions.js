@@ -109,7 +109,49 @@ router.get('/', function (req, res, next) {
 router.post('/', function (req, res) {
     console.log(req.body)
 
-    if (req.body.subjectFilter) {
+    if (req.body.userRating) {
+        if (!req.user) {
+            res.render('signin', {sign_in_out: signString, sign_in_out_url: signUrl});
+        } else {
+            //do mysql stuffs
+
+            // First you need to create a connection to the db
+            const con = mysql.createConnection({
+                host: 'localhost',
+                user: 'root',
+                password: '',
+                database: 'koeko_website'
+            });
+
+
+            con.connect(function (err) {
+                if (err) throw err;
+
+                var sql = "REPLACE INTO relation_resource_user_rating (IDENTIFIER_RESOURCE, IDENTIFIER_USER, RATING, MODIF_DATE) " +
+                    "VALUES ('" + req.body.questionRated + "', '" + req.user + "', '" + req.body.userRating + "', '" +  new Date().getTime() + "')";
+                con.query(sql, function (err, result) {
+                    if (err) throw err;
+                    console.log("Number of records inserted: " + result.affectedRows);
+
+                    if (req.user) {
+                        signString = "Sign Out"
+                        signUrl = "signout"
+                        currentUser = req.user
+                    } else {
+                        signString = "Sign In"
+                        signUrl = "signin"
+                        currentUser = ""
+                    }
+
+                    data = {questions: questionsArray, currentUser: currentUser};
+                    res.render('questions', {
+                        sign_in_out: signString, sign_in_out_url: signUrl, data: data,
+                        mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
+                    });
+                });
+            });
+        }
+    } else if (req.body.subjectFilter) {
         //handle search request
         console.log("search request");
         //reinit question array
@@ -212,7 +254,6 @@ router.post('/', function (req, res) {
         console.log("posted Save my Changes")
 
         //parse the post request to a 2d array for selected questions
-        var date = new Date();
         var questionsNotParsed = req.body.selectedQuestions.split(",")
         questionsNotParsed.shift()
         var questions = [];
@@ -223,7 +264,7 @@ router.post('/', function (req, res) {
         console.log(questions)
         for (i = 0; i < questions.length; i++) {
             questions[i].push(req.user)
-            questions[i].push(date.getDate())
+            questions[i].push(new Date().getTime())
         }
 
         //parse the post request to an array for unselected questions

@@ -59,13 +59,14 @@ block content
                                 span(class="star" id="star5")
                             div(class='stars') Your rating:
                                 span(class="star" id="ustar1" onclick='rate1star()')
-                                span(class="star" id="ustar2" onclick='rate2star()')
-                                span(class="star" id="ustar3" onclick='rate3star()')
-                                span(class="star" id="ustar4" onclick='rate4star()')
-                                span(class="star" id="ustar5" onclick='rate5star()')
-                                form(method='POST' action='/questions' class="form_sign")
-                                    input(type='text' hidden=true name='userRating' value='' id='userRating')
-                                    button(type='submit', id='submitRating') Submit my rating
+                                span(class="star" id="ustar2" onclick='rate2stars()')
+                                span(class="star" id="ustar3" onclick='rate3stars()')
+                                span(class="star" id="ustar4" onclick='rate4stars()')
+                                span(class="star" id="ustar5" onclick='rate5stars()')
+                            form(method='POST' action='/questions' class="form_sign")
+                                input(type='text' hidden=true name='userRating' value='' id='userRating')
+                                input(type='text' hidden=true name='questionRated' value='' id='questionRated')
+                                button(type='submit', id='submitRating') Submit my rating
                             button.button-select(onclick="selectQuestion()") Select Question
 
     script(type='text/javascript').
@@ -74,6 +75,7 @@ block content
         var selectButton = document.querySelector(".button-select");
         var saveButton = document.getElementById("saveChangesButton");
         var userQuesCombo = document.getElementById("userQuestionsCombobox");
+        var rateButton = document.getElementById("submitRating");
 
         var questionsArray = !{JSON.stringify(data.questions)};
         var selectedQuestions = [[]];
@@ -89,6 +91,7 @@ block content
             userQuesCombo.disabled = true;
             saveButton.disabled = true;
         }
+        rateButton.disabled = true;
 
         var table = document.getElementById("questions_table");
         var i;
@@ -153,28 +156,54 @@ block content
             modal.classList.toggle("show-modal");
         }
 
+        function setUserRating(rating) {
+            var stars = ['ustar1', 'ustar2', 'ustar3', 'ustar4', 'ustar5'];
+            var starDesign = 'star on';
+            for (var j = 1; j < stars.length + 1; j++) {
+                if (rating > (j - 0.25)) {
+                    document.getElementById(stars[j - 1]).className = starDesign;
+                } else if (rating > (j - 0.75)) {
+                    document.getElementById(stars[j - 1]).className = 'star half';
+                } else {
+                    starDesign = 'star';
+                    document.getElementById(stars[j - 1]).className = starDesign;
+                }
+            }
+        }
+
         function rate1star() {
             document.getElementById('userRating').value = 1
-            alert("rate 1")
+            document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
+            rateButton.disabled = false;
+            setUserRating(1)
         }
         function rate2stars() {
             document.getElementById('userRating').value = 2
-            alert("rate 2")
+            document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
+            rateButton.disabled = false;
+            setUserRating(2)
         }
         function rate3stars() {
             document.getElementById('userRating').value = 3
-            alert("rate 3")
+            document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
+            rateButton.disabled = false;
+            setUserRating(3)
         }
         function rate4stars() {
             document.getElementById('userRating').value = 4
-            alert("rate 4")
+            document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
+            rateButton.disabled = false;
+            setUserRating(4)
         }
         function rate5stars() {
             document.getElementById('userRating').value = 5
-            alert("rate 5")
+            document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
+            rateButton.disabled = false;
+            setUserRating(5)
         }
 
         function selectQuestion() {
+            document.getElementById('userRating').value = ""
             if (questionsArray[currentQuestionIndex].userSelected == "notselected.png") {
                 questionsArray[currentQuestionIndex].userSelected = "selected.png"
 
