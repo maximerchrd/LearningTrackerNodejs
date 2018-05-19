@@ -65,10 +65,10 @@ router.get('/', function (req, res, next) {
             if (err) throw err;
             for (var i in rows) {
                 if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
-                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "selected.png");
+                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                     questionsArray.push(question);
                 } else {
-                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "notselected.png");
+                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                     questionsArray.push(question);
                 }
             }
@@ -78,10 +78,10 @@ router.get('/', function (req, res, next) {
             if (err) throw err;
             for (var i in rows) {
                 if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
-                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 5, "selected.png");
+                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                     questionsArray.push(question);
                 } else {
-                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 5, "notselected.png");
+                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                     questionsArray.push(question);
                 }
             }

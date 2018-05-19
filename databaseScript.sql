@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS multiple_choice_questions (ID INT NOT NULL AUTO_INCRE
     OPTION6 TEXT,OPTION7 TEXT,OPTION8 TEXT,OPTION9 TEXT,
     NB_CORRECT_ANS INT,
     IMAGE_PATH TEXT,
-    RATING INT,
+    RATING FLOAT,
     MODIF_DATE TEXT,
     PRIMARY KEY (ID));
 
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS short_answer_questions (ID INT NOT NULL AUTO_INCREMEN
     QUESTION TEXT NOT NULL,
     IMAGE_PATH TEXT,
     MODIF_DATE TEXT,
-    RATING INT,
+    RATING FLOAT,
     PRIMARY KEY (ID));
 
 CREATE TABLE IF NOT EXISTS users (ID INT NOT NULL AUTO_INCREMENT,
@@ -130,12 +130,15 @@ CREATE TABLE IF NOT EXISTS relation_resource_user (ID INT NOT NULL AUTO_INCREMEN
 
 
 
-INSERT INTO multiple_choice_questions (QUESTION,OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS,IMAGE_PATH,IDENTIFIER)
+INSERT INTO multiple_choice_questions (QUESTION,OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS,IMAGE_PATH,RATING,IDENTIFIER)
 VALUES("What alternative to mice experimentation was recently improved by the EPFL?",
-"nematodes","monkeys","rats","bacterias","cats","","","","","","1","app-image_1.jpg","123456789101237");
+"nematodes","monkeys","rats","bacterias","cats","","","","","","1","app-image_1.jpg","4.64","123456789101237");
 
 INSERT INTO short_answer_questions (QUESTION,IMAGE_PATH,RATING,IDENTIFIER)
 VALUES("What are the closest planets to earth?","goal.jpg","4","123456789101230");
+
+INSERT INTO short_answer_questions (QUESTION,IMAGE_PATH,RATING,IDENTIFIER)
+VALUES("Try to answer nothing to this","goal.jpg","2.36","223456789101230");
 
 INSERT INTO answer_options (ANSWER_OPTION,IDENTIFIER)
 VALUES("Venus","123456789101231");

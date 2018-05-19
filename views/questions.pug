@@ -17,8 +17,8 @@ block content
             button.btn.btn-primary(type='submit') Search
 
     form(method='POST' action='/questions' class="form_sign")
-        input(type='text' hidden=true placeholder='username' name='selectedQuestions' value='' id='selectedQuestionsField')
-        input(type='text' hidden=true placeholder='username' name='unselectedQuestions' value='' id='unselectedQuestionsField')
+        input(type='text' hidden=true name='selectedQuestions' value='' id='selectedQuestionsField')
+        input(type='text' hidden=true name='unselectedQuestions' value='' id='unselectedQuestionsField')
         button(type='submit', id='saveChangesButton') Save my Changes
 
     table(style='width:40%', border='1', id='questions_table')
@@ -27,7 +27,7 @@ block content
                 th Question
                 th Question Type
                 th Picture
-                th Rating
+                th(width="120px") Rating
                 th My Questions
         tbody
             each question, index in data.questions
@@ -36,7 +36,13 @@ block content
                     td=question.questionType
                     td
                         img(src="/users_images/mini_" + question.imageName)
-                    td=question.rating
+                    td
+                        div(class='stars')
+                            span(class="star", id=index + "_tstar1")
+                            span(class="star", id=index + "_tstar2")
+                            span(class="star", id=index + "_tstar3")
+                            span(class="star", id=index + "_tstar4")
+                            span(class="star", id=index + "_tstar5")
                     td
                         img(id="checkboxImage" + index, src="/images/" + question.userSelected)
                     .modal
@@ -52,129 +58,168 @@ block content
                                 span(class="star" id="star4")
                                 span(class="star" id="star5")
                             div(class='stars') Your rating:
-                                span(class="star" id="ustar1")
-                                span(class="star" id="ustar2")
-                                span(class="star" id="ustar3")
-                                span(class="star" id="ustar4")
-                                span(class="star" id="ustar5")
+                                span(class="star" id="ustar1" onclick='rate1star()')
+                                span(class="star" id="ustar2" onclick='rate2star()')
+                                span(class="star" id="ustar3" onclick='rate3star()')
+                                span(class="star" id="ustar4" onclick='rate4star()')
+                                span(class="star" id="ustar5" onclick='rate5star()')
+                                form(method='POST' action='/questions' class="form_sign")
+                                    input(type='text' hidden=true name='userRating' value='' id='userRating')
+                                    button(type='submit', id='submitRating') Submit my rating
                             button.button-select(onclick="selectQuestion()") Select Question
-                    script(type='text/javascript').
-                        src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"
-                        var modal = document.querySelector(".modal");
-                        var selectButton = document.querySelector(".button-select");
-                        var saveButton = document.getElementById("saveChangesButton");
-                        var userQuesCombo = document.getElementById("userQuestionsCombobox");
 
-                        var questionsArray = !{JSON.stringify(data.questions)};
-                        var selectedQuestions = [[]];
-                        var unselectedQuestions = [];
-                        var currentQuestionIndex = 0;
+    script(type='text/javascript').
+        src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+        var modal = document.querySelector(".modal");
+        var selectButton = document.querySelector(".button-select");
+        var saveButton = document.getElementById("saveChangesButton");
+        var userQuesCombo = document.getElementById("userQuestionsCombobox");
 
-                        var question_text = document.querySelector(".question-text");
-                        var question_type = document.querySelector(".question-type");
-                        var questionImage = document.getElementById("questionImage");
+        var questionsArray = !{JSON.stringify(data.questions)};
+        var selectedQuestions = [[]];
+        var unselectedQuestions = [];
+        var currentQuestionIndex = 0;
 
-                        var numberofcloses = 0;
+        var question_text = document.querySelector(".question-text");
+        var question_type = document.querySelector(".question-type");
+        var questionImage = document.getElementById("questionImage");
 
-                        if (!{JSON.stringify(data.currentUser)} == "") {
-                            userQuesCombo.disabled = true;
-                            saveButton.disabled = true;
-                        }
 
-                        function toggleModal(id) {
-                            var index = 0;
-                            if (typeof id === 'undefined') {
-                                index = 1;
-                            } else if (id.rowIndex - 1 < questionsArray.length && id.rowIndex - 1 >= 0) {
-                                index = id.rowIndex - 1;
-                            }
-                            currentQuestionIndex = index;
-                            question_text.innerHTML = questionsArray[index].questionText;
-                            question_type.innerHTML = questionsArray[index].questionType;
-                            questionImage.src = "/users_images/" + questionsArray[index].imageName;
-                            if (questionImage && questionImage.style) {
-                                questionImage.style.height = "300px"
-                            }
-                            if (!{JSON.stringify(data.currentUser)} == "") {
-                                selectButton.disabled = true;
-                            } else {
-                                if (questionsArray[index].userSelected == "selected.png") {
-                                    selectButton.innerHTML = "Unselect Question"
-                                } else {
-                                    selectButton.innerHTML = "Select Question"
-                                }
-                            }
+        if (!{JSON.stringify(data.currentUser)} == "") {
+            userQuesCombo.disabled = true;
+            saveButton.disabled = true;
+        }
 
-                            //set the average rating
-                            if (questionsArray[index].rating >= 1) {
-                                document.getElementById('star1').className = 'star on';
-                            }
-                            if (questionsArray[index].rating >= 2) {
-                                document.getElementById('star2').className = 'star on';
-                            }
-                            if (questionsArray[index].rating >= 3) {
-                                document.getElementById('star3').className = 'star on';
-                            }
-                            if (questionsArray[index].rating >= 4) {
-                                document.getElementById('star4').className = 'star on';
-                            }
-                            if (questionsArray[index].rating >= 5) {
-                                document.getElementById('star5').className = 'star on';
-                            }
+        var table = document.getElementById("questions_table");
+        var i;
+        for (i = 0; table.rows.length - 1; i++) {
+            var tstars = ['_tstar1', '_tstar2', '_tstar3', '_tstar4', '_tstar5'];
+            var starDesign = 'star on';
 
-                            modal.classList.toggle("show-modal");
-                        }
+            for (var j = 1; j < tstars.length + 1; j++) {
+                if (questionsArray[i].rating > (j - 0.25)) {
+                    document.getElementById(i + tstars[j - 1]).className = starDesign;
+                } else if (questionsArray[i].rating > (j - 0.75)) {
+                    document.getElementById(i + tstars[j - 1]).className = 'star half';
+                } else {
+                    starDesign = 'star';
+                    document.getElementById(i + tstars[j - 1]).className = starDesign;
+                }
+            }
+        }
 
-                        function toggleModalClose() {
-                            modal.classList.toggle("show-modal");
-                        }
+        function toggleModal(id) {
+            var index = 0;
+            if (typeof id === 'undefined') {
+                index = 1;
+            } else if (id.rowIndex - 1 < questionsArray.length && id.rowIndex - 1 >= 0) {
+                index = id.rowIndex - 1;
+            }
+            currentQuestionIndex = index;
+            question_text.innerHTML = questionsArray[index].questionText;
+            question_type.innerHTML = questionsArray[index].questionType;
+            questionImage.src = "/users_images/" + questionsArray[index].imageName;
+            if (questionImage && questionImage.style) {
+                questionImage.style.height = "300px"
+            }
+            if (!{JSON.stringify(data.currentUser)} == "") {
+                selectButton.disabled = true;
+            } else {
+                if (questionsArray[index].userSelected == "selected.png") {
+                    selectButton.innerHTML = "Unselect Question"
+                } else {
+                    selectButton.innerHTML = "Select Question"
+                }
+            }
 
-                        function selectQuestion() {
-                            if (questionsArray[currentQuestionIndex].userSelected == "notselected.png") {
-                                questionsArray[currentQuestionIndex].userSelected = "selected.png"
+            //set the average rating
+            var stars = ['star1','star2','star3','star4','star5'];
+            var starDesign = 'star on';
+            for (var j = 1; j < stars.length + 1; j++) {
+                if (questionsArray[index].rating > (j - 0.25)) {
+                    document.getElementById(stars[j - 1]).className = starDesign;
+                } else if (questionsArray[index].rating > (j - 0.75)) {
+                    document.getElementById(stars[j - 1]).className = 'star half';
+                } else {
+                    starDesign = 'star';
+                    document.getElementById(stars[j - 1]).className = starDesign;
+                }
+            }
 
-                                //if the question was unselected without saving inbetween, remove it from the unselectedQuestions array
-                                if (unselectedQuestions.indexOf(questionsArray[currentQuestionIndex].questionID) != -1) {
-                                    var indexToRemove = unselectedQuestions.indexOf(questionsArray[currentQuestionIndex].questionID);
-                                    unselectedQuestions.splice(indexToRemove, 1)
-                                } else {
-                                    if (questionsArray[currentQuestionIndex].questionType == "Short Answer") {
-                                        selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "SRTA"]);
-                                    } else {
-                                        selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "MLCQ"]);
-                                    }
-                                }
-                                document.getElementById("checkboxImage" + currentQuestionIndex).src = "/images/selected.png";
-                                document.getElementById('selectedQuestionsField').value = selectedQuestions;
-                                document.getElementById('unselectedQuestionsField').value = unselectedQuestions;
-                            } else {
-                                questionsArray[currentQuestionIndex].userSelected = "notselected.png"
+            modal.classList.toggle("show-modal");
+        }
 
-                                //if the question was selected without saving inbetween, remove it from the questions array
-                                var i;
-                                var indexToRemove = -1;
-                                for (i = 0; i < selectedQuestions.length && indexToRemove == -1; i++) {
-                                    if (selectedQuestions[i][0] == questionsArray[currentQuestionIndex].questionID) {
-                                        indexToRemove = i;
-                                    }
-                                }
+        function toggleModalClose() {
+            modal.classList.toggle("show-modal");
+        }
 
-                                if (indexToRemove != -1) {
-                                    selectedQuestions.splice(indexToRemove,1);
-                                } else {
-                                    unselectedQuestions.push(questionsArray[currentQuestionIndex].questionID);
-                                }
+        function rate1star() {
+            document.getElementById('userRating').value = 1
+            alert("rate 1")
+        }
+        function rate2stars() {
+            document.getElementById('userRating').value = 2
+            alert("rate 2")
+        }
+        function rate3stars() {
+            document.getElementById('userRating').value = 3
+            alert("rate 3")
+        }
+        function rate4stars() {
+            document.getElementById('userRating').value = 4
+            alert("rate 4")
+        }
+        function rate5stars() {
+            document.getElementById('userRating').value = 5
+            alert("rate 5")
+        }
 
-                                document.getElementById("checkboxImage" + currentQuestionIndex).src = "/images/notselected.png";
-                                document.getElementById('unselectedQuestionsField').value = unselectedQuestions;
-                                document.getElementById('selectedQuestionsField').value = selectedQuestions;
-                            }
-                            toggleModalClose();
-                        }
+        function selectQuestion() {
+            if (questionsArray[currentQuestionIndex].userSelected == "notselected.png") {
+                questionsArray[currentQuestionIndex].userSelected = "selected.png"
 
-                        function windowOnClick(event) {
-                            if (event.target === modal) {
-                                toggleModal();
-                            }
-                        }
-                        window.addEventListener("click", windowOnClick);
+                //if the question was unselected without saving inbetween, remove it from the unselectedQuestions array
+                if (unselectedQuestions.indexOf(questionsArray[currentQuestionIndex].questionID) != -1) {
+                    var indexToRemove = unselectedQuestions.indexOf(questionsArray[currentQuestionIndex].questionID);
+                    unselectedQuestions.splice(indexToRemove, 1)
+                } else {
+                    if (questionsArray[currentQuestionIndex].questionType == "Short Answer") {
+                        selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "SRTA"]);
+                    } else {
+                        selectedQuestions.push([questionsArray[currentQuestionIndex].questionID, "MLCQ"]);
+                    }
+                }
+                document.getElementById("checkboxImage" + currentQuestionIndex).src = "/images/selected.png";
+                document.getElementById('selectedQuestionsField').value = selectedQuestions;
+                document.getElementById('unselectedQuestionsField').value = unselectedQuestions;
+            } else {
+                questionsArray[currentQuestionIndex].userSelected = "notselected.png"
+
+                //if the question was selected without saving inbetween, remove it from the questions array
+                var i;
+                var indexToRemove = -1;
+                for (i = 0; i < selectedQuestions.length && indexToRemove == -1; i++) {
+                    if (selectedQuestions[i][0] == questionsArray[currentQuestionIndex].questionID) {
+                        indexToRemove = i;
+                    }
+                }
+
+                if (indexToRemove != -1) {
+                    selectedQuestions.splice(indexToRemove,1);
+                } else {
+                    unselectedQuestions.push(questionsArray[currentQuestionIndex].questionID);
+                }
+
+                document.getElementById("checkboxImage" + currentQuestionIndex).src = "/images/notselected.png";
+                document.getElementById('unselectedQuestionsField').value = unselectedQuestions;
+                document.getElementById('selectedQuestionsField').value = selectedQuestions;
+            }
+            toggleModalClose();
+        }
+
+        function windowOnClick(event) {
+            if (event.target === modal) {
+                toggleModal();
+            }
+        }
+        window.addEventListener("click", windowOnClick);
