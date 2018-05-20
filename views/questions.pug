@@ -30,44 +30,46 @@ block content
                 th(width="120px") Rating
                 th My Questions
         tbody
-            each question, index in data.questions
+            - for (var i = 0; i < 10; ++i) {
                 tr(onclick="toggleModal(this)")
-                    td=question.questionText
-                    td=question.questionType
+                    td=data.questions[i].questionText
+                    td=data.questions[i].questionType
                     td
-                        img(src="/users_images/mini_" + question.imageName)
+                        img(src="/users_images/mini_" + data.questions[i].imageName)
                     td
                         div(class='stars')
-                            span(class="star", id=index + "_tstar1")
-                            span(class="star", id=index + "_tstar2")
-                            span(class="star", id=index + "_tstar3")
-                            span(class="star", id=index + "_tstar4")
-                            span(class="star", id=index + "_tstar5")
+                            span(class="star", id=i + "_tstar1")
+                            span(class="star", id=i + "_tstar2")
+                            span(class="star", id=i + "_tstar3")
+                            span(class="star", id=i + "_tstar4")
+                            span(class="star", id=i + "_tstar5")
                     td
-                        img(id="checkboxImage" + index, src="/images/" + question.userSelected)
-                    .modal
-                        .modal-content
-                            span(class="close-button", onclick="toggleModalClose()") &times;
-                            .question-text some text
-                            .question-type some type
-                            img(src="/users_images/", id="questionImage")
-                            div(class='stars') Average rating:
-                                span(class="star" id="star1")
-                                span(class="star" id="star2")
-                                span(class="star" id="star3")
-                                span(class="star" id="star4")
-                                span(class="star" id="star5")
-                            div(class='stars') Your rating:
-                                span(class="star" id="ustar1" onclick='rate1star()')
-                                span(class="star" id="ustar2" onclick='rate2stars()')
-                                span(class="star" id="ustar3" onclick='rate3stars()')
-                                span(class="star" id="ustar4" onclick='rate4stars()')
-                                span(class="star" id="ustar5" onclick='rate5stars()')
-                            form(method='POST' action='/questions' class="form_sign")
-                                input(type='text' hidden=true name='userRating' value='' id='userRating')
-                                input(type='text' hidden=true name='questionRated' value='' id='questionRated')
-                                button(type='submit', id='submitRating') Submit my rating
-                            button.button-select(onclick="selectQuestion()") Select Question
+                        img(id="checkboxImage" + i, src="/images/" + data.questions[i].userSelected)
+            -}
+    button(onclick='loadMoreQuestions()') Load more Questions
+    .modal
+        .modal-content
+            span(class="close-button", onclick="toggleModalClose()") &times;
+            .question-text some text
+            .question-type some type
+            img(src="/users_images/", id="questionImage")
+            div(class='stars') Average rating:
+                span(class="star" id="star1")
+                span(class="star" id="star2")
+                span(class="star" id="star3")
+                span(class="star" id="star4")
+                span(class="star" id="star5")
+            div(class='stars') Your rating:
+                span(class="star" id="ustar1" onclick='rate1star()')
+                span(class="star" id="ustar2" onclick='rate2stars()')
+                span(class="star" id="ustar3" onclick='rate3stars()')
+                span(class="star" id="ustar4" onclick='rate4stars()')
+                span(class="star" id="ustar5" onclick='rate5stars()')
+            form(method='POST' action='/questions' class="form_sign")
+                input(type='text' hidden=true name='userRating' value='' id='userRating')
+                input(type='text' hidden=true name='questionRated' value='' id='questionRated')
+                button(type='submit', id='submitRating') Submit my rating
+            button.button-select(onclick="selectQuestion()") Select Question
 
     script(type='text/javascript').
         src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"
@@ -244,6 +246,45 @@ block content
                 document.getElementById('selectedQuestionsField').value = selectedQuestions;
             }
             toggleModalClose();
+        }
+
+        function loadMoreQuestions() {
+            var table = document.getElementById("questions_table");
+            var i = table.rows.length
+            var j = table.rows.length
+            for (; i < questionsArray.length && i < 10 + j; i++) {
+                var questionIndex = i - 1
+                var html_image = ["<img src='/users_images/mini_" + questionsArray[questionIndex].imageName + "' id='imageQuest'>"]
+                var html_rating = ["<div class='stars'><span class='star' id='" + questionIndex + "_tstar1'></span><span class='star' id='" + questionIndex + "_tstar2'></span><span class='star' id='" + questionIndex + "_tstar3'></span><span class='star' id='" + questionIndex + "_tstar4'></span><span class='star' id='" + questionIndex + "_tstar5'></span></div>"]
+                var row = table.insertRow(table.rows.length);
+                row.setAttribute("onclick", "toggleModal(this)", 0);
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+                var cell4 = row.insertCell(3);
+                var cell5 = row.insertCell(4);
+
+                cell1.innerHTML = questionsArray[questionIndex].questionText;
+                cell2.innerHTML = questionsArray[questionIndex].questionType;
+                cell3.innerHTML = html_image
+                cell4.innerHTML = html_rating
+                cell5.innerHTML = "<img id='checkboxImage" + questionIndex + "' src='/images/" + questionsArray[questionIndex].userSelected + "' >"
+
+                var tstars = ['_tstar1', '_tstar2', '_tstar3', '_tstar4', '_tstar5'];
+                var starDesign = 'star on';
+
+                for (var k = 1; k < tstars.length + 1; k++) {
+                    if (questionsArray[questionIndex].rating > (k - 0.25)) {
+                        document.getElementById(questionIndex + tstars[k - 1]).className = starDesign;
+                    } else if (questionsArray[questionIndex].rating > (k - 0.75)) {
+                        document.getElementById(questionIndex + tstars[k - 1]).className = 'star half';
+                    } else {
+                        starDesign = 'star';
+                        document.getElementById(questionIndex + tstars[k - 1]).className = starDesign;
+                    }
+                }
+            }
         }
 
         function windowOnClick(event) {

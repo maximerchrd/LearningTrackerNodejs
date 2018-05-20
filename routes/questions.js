@@ -61,7 +61,7 @@ router.get('/', function (req, res, next) {
             });
         }
 
-        con.query("SELECT * FROM short_answer_questions;", function (err, rows) {
+        con.query("SELECT * FROM short_answer_questions LIMIT 500;", function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
                 if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
@@ -74,7 +74,7 @@ router.get('/', function (req, res, next) {
             }
         });
 
-        con.query("SELECT * FROM multiple_choice_questions;", function (err, rows) {
+        con.query("SELECT * FROM multiple_choice_questions LIMIT 500;", function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
                 if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
@@ -163,10 +163,10 @@ router.post('/', function (req, res) {
         if (req.body.subjectFilter != "All subjects") {
             shrtaqQuery += "INNER JOIN `relation_question_subject` ON `short_answer_questions`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
             "INNER JOIN `subjects` ON `relation_question_subject`.`IDENTIFIER_SUBJECT` = `subjects`.`IDENTIFIER` " +
-            "WHERE `subjects`.`SUBJECT` = '" + req.body.subjectFilter + "' ";
+            "WHERE `subjects`.`SUBJECT` = '" + req.body.subjectFilter + "' LIMIT 500";
             mcqQuery += "INNER JOIN `relation_question_subject` ON `multiple_choice_questions`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
                 "INNER JOIN `subjects` ON `relation_question_subject`.`IDENTIFIER_SUBJECT` = `subjects`.`IDENTIFIER` " +
-                "WHERE `subjects`.`SUBJECT` = '" + req.body.subjectFilter + "' ";
+                "WHERE `subjects`.`SUBJECT` = '" + req.body.subjectFilter + "' LIMIT 500";
 
             if (req.body.keyword != "") {
                 shrtaqQuery += "AND QUESTION LIKE '%" + req.body.keyword + "%' ";
