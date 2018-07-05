@@ -26,7 +26,8 @@ passport.use(new LocalStrategy(function (username, password, done) {
         var dbPassword = "";
 
         //do mysql stuffs
-        var sql = "SELECT * FROM users WHERE username='" + username + "';"
+        var sql = "SELECT * FROM users WHERE username = ?"
+        var sqlArg = [username]
         // First you need to create a connection to the db
         const con = mysql.createConnection({
             host: 'localhost',
@@ -36,7 +37,7 @@ passport.use(new LocalStrategy(function (username, password, done) {
         });
         con.connect(function (err) {
             if (err) throw err;
-            con.query(sql, function (err, rows) {
+            con.query(sql, sqlArg, function (err, rows) {
                 if (err) throw err;
                 rows.forEach(function (row) {
                     dbPassword = row.password;

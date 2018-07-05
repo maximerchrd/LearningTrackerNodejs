@@ -53,7 +53,7 @@ router.get('/', function (req, res, next) {
 
         //get the relations between questions and user
         if (req.user) {
-            con.query("SELECT * FROM relation_resource_user WHERE IDENTIFIER_USER='" + req.user + "';", function (err, rows) {
+            con.query("SELECT * FROM relation_resource_user WHERE IDENTIFIER_USER=?",req.user, function (err, rows) {
                 if (err) throw err;
                 for (var i in rows) {
                     resourceIdsForUser.push(rows[i].IDENTIFIER_RESOURCE)
@@ -128,8 +128,9 @@ router.post('/', function (req, res) {
                 if (err) throw err;
 
                 var sql = "REPLACE INTO relation_resource_user_rating (IDENTIFIER_RESOURCE, IDENTIFIER_USER, RATING, MODIF_DATE) " +
-                    "VALUES ('" + req.body.questionRated + "', '" + req.user + "', '" + req.body.userRating + "', '" +  new Date().getTime() + "')";
-                con.query(sql, function (err, result) {
+                    "VALUES (?, ?, ?, ?)";
+                var sqlArgs = [req.body.questionRated, req.user, req.body.userRating, new Date().getTime()]
+                con.query(sql, sqlArgs, function (err, result) {
                     if (err) throw err;
                     console.log("Number of records inserted: " + result.affectedRows);
 
