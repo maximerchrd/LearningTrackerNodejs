@@ -158,25 +158,39 @@ router.post('/', function (req, res) {
         questionsArray = [];
         var shrtaqQuery = "SELECT * FROM short_answer_questions ";
         var mcqQuery = "SELECT * FROM multiple_choice_questions ";
+        var shrtaqArg = []
+        var mcqArg = []
 
         console.log(req.body.subjectFilter)
         if (req.body.subjectFilter != "All subjects") {
             shrtaqQuery += "INNER JOIN `relation_question_subject` ON `short_answer_questions`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
             "INNER JOIN `subjects` ON `relation_question_subject`.`IDENTIFIER_SUBJECT` = `subjects`.`IDENTIFIER` " +
-            "WHERE `subjects`.`SUBJECT` = '" + req.body.subjectFilter + "' LIMIT 500";
+            "WHERE `subjects`.`SUBJECT` = ? ";
+            shrtaqArg.push(req.body.subjectFilter)
+
             mcqQuery += "INNER JOIN `relation_question_subject` ON `multiple_choice_questions`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
                 "INNER JOIN `subjects` ON `relation_question_subject`.`IDENTIFIER_SUBJECT` = `subjects`.`IDENTIFIER` " +
-                "WHERE `subjects`.`SUBJECT` = '" + req.body.subjectFilter + "' LIMIT 500";
+                "WHERE `subjects`.`SUBJECT` = ? ";
+            mcqArg.push(req.body.subjectFilter)
 
             if (req.body.keyword != "") {
-                shrtaqQuery += "AND QUESTION LIKE '%" + req.body.keyword + "%' ";
-                mcqQuery += "AND QUESTION LIKE '%" + req.body.keyword + "%' ";
+                shrtaqQuery += " AND QUESTION LIKE ? ";
+                shrtaqArg.push("%" + req.body.keyword + "%")
+
+                mcqQuery += " AND QUESTION LIKE ? ";
+                mcqArg.push("%" + req.body.keyword + "%")
             }
+
+            shrtaqQuery += " LIMIT 500"
+            mcqQuery += " LIMIT 500"
         }
 
         if (req.body.subjectFilter == "All subjects" && req.body.keyword != "") {
-            shrtaqQuery += "WHERE QUESTION LIKE '%" + req.body.keyword + "%' ";
-            mcqQuery += "WHERE QUESTION LIKE '%" + req.body.keyword + "%' ";
+            shrtaqQuery += "WHERE QUESTION LIKE ? ";
+            shrtaqArg.push("%" + req.body.keyword + "%")
+
+            mcqQuery += "WHERE QUESTION LIKE ? ";
+            mcqArg.push("%" + req.body.keyword + "%")
         }
 
 
@@ -192,7 +206,7 @@ router.post('/', function (req, res) {
         con.connect(function (err) {
             if (err) throw err;
 
-            con.query(shrtaqQuery, function (err, rows) {
+            con.query(shrtaqQuery, shrtaqArg, function (err, rows) {
                 if (err) throw err;
                 for (var i in rows) {
                     if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
@@ -213,7 +227,7 @@ router.post('/', function (req, res) {
                 }
             });
 
-            con.query(mcqQuery, function (err, rows) {
+            con.query(mcqQuery, mcqArg, function (err, rows) {
                 if (err) throw err;
                 for (var i in rows) {
                     if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
