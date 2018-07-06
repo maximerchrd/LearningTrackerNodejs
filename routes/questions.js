@@ -5,10 +5,11 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({extended: false}));
 router.use(bodyParser.json());
 
-var questSelectedFilter = ["All questions", "My questions", "Other questions"];
-var mainSubjects = ["All subjects"];
-var questionsArray = [];
-var resourceIdsForUser = [];
+var questSelectedFilter = ["All questions", "My questions", "Other questions"]
+var mainSubjects = ["All subjects"]
+var questionsArray = []
+var resourceIdsForUser = []
+var ratingForResource = []
 var signString = ""
 var signUrl = ""
 var data;
@@ -52,11 +53,20 @@ router.get('/', function (req, res, next) {
         });
 
         //get the relations between questions and user
+        var ratingForResourceDictonary = {}
         if (req.user) {
             con.query("SELECT * FROM relation_resource_user WHERE IDENTIFIER_USER=?",req.user, function (err, rows) {
                 if (err) throw err;
                 for (var i in rows) {
                     resourceIdsForUser.push(rows[i].IDENTIFIER_RESOURCE)
+                }
+            });
+
+            //get user rating
+            con.query("SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_USER=?",req.user, function (err, rows) {
+                if (err) throw err;
+                for (var i in rows) {
+                    ratingForResourceDictonary[rows[i].IDENTIFIER_RESOURCE] = rows[i].RATING
                 }
             });
         }
@@ -97,7 +107,15 @@ router.get('/', function (req, res, next) {
                 currentUser = ""
             }
 
-            data = {questions: questionsArray, currentUser: currentUser};
+            //fill array containing the rating for each question using the dictionary as source
+            for (var i in questionsArray) {
+                if (questionsArray[i].questionID in ratingForResourceDictonary) {
+                    ratingForResource.push(ratingForResourceDictonary[questionsArray[i].questionID])
+                } else {
+                    ratingForResource.push(0)
+                }
+            }
+            data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource};
             res.render('questions', {
                 sign_in_out: signString, sign_in_out_url: signUrl, data: data,
                 mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
@@ -110,6 +128,7 @@ router.post('/', function (req, res) {
     console.log(req.body)
 
     if (req.body.userRating) {
+        //save user rating
         if (!req.user) {
             res.render('signin', {sign_in_out: signString, sign_in_out_url: signUrl});
         } else {
@@ -144,7 +163,17 @@ router.post('/', function (req, res) {
                         currentUser = ""
                     }
 
-                    data = {questions: questionsArray, currentUser: currentUser};
+                    var index = -1
+                    for (var i in questionsArray) {
+                        if (questionsArray[i].questionID == req.body.questionRated) {
+                            index = i
+                        }
+                    }
+                    if (index >= 0) {
+                        ratingForResource[index] = req.body.userRating
+                    }
+
+                    data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource};
                     res.render('questions', {
                         sign_in_out: signString, sign_in_out_url: signUrl, data: data,
                         mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
@@ -207,20 +236,21 @@ router.post('/', function (req, res) {
         con.connect(function (err) {
             if (err) throw err;
 
+            questionsArray = []
             con.query(shrtaqQuery, shrtaqArg, function (err, rows) {
                 if (err) throw err;
                 for (var i in rows) {
                     if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                         if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                             if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "My questions") {
-                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "selected.png");
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                                 questionsArray.push(question);
                             }
                         }
                     } else {
                         if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "Other questions") {
                             if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "Other questions") {
-                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, 3, "notselected.png");
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                                 questionsArray.push(question);
                             }
                         }
@@ -234,18 +264,28 @@ router.post('/', function (req, res) {
                     if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                         if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                             if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "My questions") {
-                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "selected.png");
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                                 questionsArray.push(question);
                             }
                         }
                     } else {
                         if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "Other questions") {
-                            var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, 3, "notselected.png");
+                            var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                             questionsArray.push(question);
                         }
                     }
                 }
+            });
 
+            //get user rating
+            con.query("SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_USER=?",req.user, function (err, rows) {
+                if (err) throw err;
+
+                var ratingForResourceDictonary = {}
+                ratingForResource = []
+                for (var i in rows) {
+                    ratingForResourceDictonary[rows[i].IDENTIFIER_RESOURCE] = rows[i].RATING
+                }
 
                 if (req.user) {
                     signString = "Sign Out"
@@ -257,7 +297,16 @@ router.post('/', function (req, res) {
                     currentUser = ""
                 }
 
-                data = {questions: questionsArray, currentUser: currentUser};
+                //fill array containing the rating for each question using the dictionary as source
+                for (var i in questionsArray) {
+                    if (questionsArray[i].questionID in ratingForResourceDictonary) {
+                        ratingForResource.push(ratingForResourceDictonary[questionsArray[i].questionID])
+                    } else {
+                        ratingForResource.push(0)
+                    }
+                }
+
+                data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource};
                 res.render('questions', {
                     sign_in_out: signString, sign_in_out_url: signUrl, data: data,
                     mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
@@ -350,7 +399,7 @@ router.post('/', function (req, res) {
             currentUser = ""
         }
 
-        data = {questions: questionsArray, currentUser: currentUser};
+        data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource};
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, data: data,
             mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter

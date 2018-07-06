@@ -84,6 +84,7 @@ block content
         var rateButton = document.getElementById("submitRating");
 
         var questionsArray = !{JSON.stringify(data.questions)};
+        var ratingForResource = !{JSON.stringify(data.ratingForResource)}
         var selectedQuestions = [[]];
         var unselectedQuestions = [];
         var currentQuestionIndex = 0;
@@ -154,6 +155,9 @@ block content
                     document.getElementById(stars[j - 1]).className = starDesign;
                 }
             }
+
+            //set the user rating
+            setUserRating(parseFloat(ratingForResource[index]))
 
             modal.classList.toggle("show-modal");
         }
