@@ -72,6 +72,7 @@ block content
             form(method='POST' action='/questions' class="form_sign")
                 input(type='text' hidden=true name='userRating' value='' id='userRating')
                 input(type='text' hidden=true name='questionRated' value='' id='questionRated')
+                input(type='text' hidden=true name='questionType' value='' id='questionType')
                 button(type='submit', id='submitRating') Submit my rating
             button.button-select(onclick="selectQuestion()") Select Question
 
@@ -184,30 +185,35 @@ block content
         function rate1star() {
             document.getElementById('userRating').value = 1
             document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
+            document.getElementById('questionType').value = questionsArray[currentQuestionIndex].questionType
             rateButton.disabled = false;
             setUserRating(1)
         }
         function rate2stars() {
             document.getElementById('userRating').value = 2
             document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
+            document.getElementById('questionType').value = questionsArray[currentQuestionIndex].questionType
             rateButton.disabled = false;
             setUserRating(2)
         }
         function rate3stars() {
             document.getElementById('userRating').value = 3
             document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
+            document.getElementById('questionType').value = questionsArray[currentQuestionIndex].questionType
             rateButton.disabled = false;
             setUserRating(3)
         }
         function rate4stars() {
             document.getElementById('userRating').value = 4
             document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
+            document.getElementById('questionType').value = questionsArray[currentQuestionIndex].questionType
             rateButton.disabled = false;
             setUserRating(4)
         }
         function rate5stars() {
             document.getElementById('userRating').value = 5
             document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
+            document.getElementById('questionType').value = questionsArray[currentQuestionIndex].questionType
             rateButton.disabled = false;
             setUserRating(5)
         }

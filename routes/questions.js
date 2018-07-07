@@ -146,37 +146,70 @@ router.post('/', function (req, res) {
             con.connect(function (err) {
                 if (err) throw err;
 
+                //first replace the user rating with the new rating
                 var sql = "REPLACE INTO relation_resource_user_rating (IDENTIFIER_RESOURCE, IDENTIFIER_USER, RATING, MODIF_DATE) " +
                     "VALUES (?, ?, ?, ?)";
                 var sqlArgs = [req.body.questionRated, req.user, req.body.userRating, new Date().getTime()]
+
                 con.query(sql, sqlArgs, function (err, result) {
                     if (err) throw err;
                     console.log("Number of records inserted: " + result.affectedRows);
 
-                    if (req.user) {
-                        signString = "Sign Out"
-                        signUrl = "signout"
-                        currentUser = req.user
-                    } else {
-                        signString = "Sign In"
-                        signUrl = "signin"
-                        currentUser = ""
-                    }
+                    //second calculate the new average rating for the question
+                    var sqlGetRatings = "SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_RESOURCE = ?"
+                    var sqlGetRatingsArgs = [req.body.questionRated]
+                    var newRating = 0.0
 
-                    var index = -1
-                    for (var i in questionsArray) {
-                        if (questionsArray[i].questionID == req.body.questionRated) {
-                            index = i
+                    con.query(sqlGetRatings, sqlGetRatingsArgs, function (err, rows) {
+                        if (err) throw err;
+
+                        for (i in rows) {
+                            newRating += parseFloat(rows[i].RATING)
                         }
-                    }
-                    if (index >= 0) {
-                        ratingForResource[index] = req.body.userRating
-                    }
+                        newRating = newRating / rows.length
 
-                    data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource};
-                    res.render('questions', {
-                        sign_in_out: signString, sign_in_out_url: signUrl, data: data,
-                        mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
+
+                        //third insert the new rating for the question
+                        var sqlSetRating = ""
+                        var sqlSetRatingArgs = []
+                        if (req.body.questionType == "Short Answer") {
+                            sqlSetRating = "UPDATE short_answer_questions SET RATING = ? WHERE IDENTIFIER = ? "
+                            sqlSetRatingArgs = [newRating, req.body.questionRated]
+                        } else {
+                            sqlSetRating = "UPDATE multiple_choice_questions SET RATING = ? WHERE IDENTIFIER = ? "
+                            sqlSetRatingArgs = [newRating, req.body.questionRated]
+                        }
+
+                        con.query(sqlSetRating, sqlSetRatingArgs, function (err, result) {
+                            if (err) throw err;
+
+                            if (req.user) {
+                                signString = "Sign Out"
+                                signUrl = "signout"
+                                currentUser = req.user
+                            } else {
+                                signString = "Sign In"
+                                signUrl = "signin"
+                                currentUser = ""
+                            }
+
+                            var index = -1
+                            for (var i in questionsArray) {
+                                if (questionsArray[i].questionID == req.body.questionRated) {
+                                    index = i
+                                    questionsArray[i].rating = newRating
+                                }
+                            }
+                            if (index >= 0) {
+                                ratingForResource[index] = req.body.userRating
+                            }
+
+                            data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource};
+                            res.render('questions', {
+                                sign_in_out: signString, sign_in_out_url: signUrl, data: data,
+                                mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
+                            });
+                        });
                     });
                 });
             });
