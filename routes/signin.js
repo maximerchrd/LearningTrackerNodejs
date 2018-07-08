@@ -39,18 +39,21 @@ passport.use(new LocalStrategy(function (username, password, done) {
             if (err) throw err;
             con.query(sql, sqlArg, function (err, rows) {
                 if (err) throw err;
-                rows.forEach(function (row) {
-                    dbPassword = row.password;
-                    var identifier = row.IDENTIFIER;
+
+                if (rows.length < 1) {
+                    return done(null, false, {message: 'No user found or password not correct'});
+                } else {
+                    dbPassword = rows[0].password;
+                    var identifier = rows[0].IDENTIFIER;
                     bcrypt.compare(password, dbPassword, function (err, res) {
                         if (err) return done(err);
                         if (res === false) {
-                            return done(null, "");
+                            return done(null, false, {message: 'No user found or password not correct'});
                         } else {
                             return done(null, identifier);
                         }
                     });
-                });
+                }
             });
         });
     }
@@ -59,6 +62,7 @@ passport.use(new LocalStrategy(function (username, password, done) {
 router.get('/', function (req, res, next) {
     var signString = ""
     var signUrl = ""
+    var message = req.flash('error')[0]
     if (req.user) {
         signString = "Sign Out"
         signUrl = "signout"
@@ -66,7 +70,7 @@ router.get('/', function (req, res, next) {
         signString = "Sign In"
         signUrl = "signin"
     }
-    res.render('signin', {sign_in_out: signString, sign_in_out_url: signUrl});
+    res.render('signin', {sign_in_out: signString, sign_in_out_url: signUrl, message: message});
     //next()
 });
 

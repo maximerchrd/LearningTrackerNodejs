@@ -13,6 +13,7 @@ var questionsRouter = require('./routes/questions');
 var signupRouter = require('./routes/sign-up');
 var signinRouter = require('./routes/signin');
 var signoutRouter = require('./routes/signout');
+var flash = require('connect-flash');
 //var jsonToDbRouter = require('./bin/jsonToDb');
 
 var app = express();
@@ -33,6 +34,8 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(flash());
 
 app.use('/', indexRouter);
 app.use('/home', indexRouter);
