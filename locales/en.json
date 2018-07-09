@@ -1,0 +1,9 @@
+{
+  "Hello": "Hello Guys",
+  "You have %s message": {
+    "one": "You have %s message",
+    "other": "You have %s messages"
+  },
+  "sign in": "Sign In",
+  "sign out": "Sign Out"
+}

@@ -1,6 +1,12 @@
 nav
     ul
         li
+            form(action="/selectlanguage" method="POST" class="form-inline")
+                select(class="select_language" name="language" id="language" onchange="this.form.submit()")
+                    option(value="en") English
+                    option(value="fr") Français
+    ul
+        li
             a(href="home" class="title") Koeko
         li
             a(href="sign-up" class="sign_item") Sign up
@@ -10,3 +16,10 @@ nav
             a(href="questions" class="nav_item") Questions
         li
             a(href="home" class="nav_item") Home
+script(type='text/javascript').
+    var language = !{JSON.stringify(data.language)};
+    if (language == "en") {
+        document.getElementById('language').options[0].selected = 'selected';
+    } else if (language == "fr") {
+        document.getElementById('language').options[1].selected = 'selected';
+    }

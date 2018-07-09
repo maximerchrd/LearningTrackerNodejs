@@ -6,6 +6,7 @@ var logger = require('morgan');
 var session = require("express-session");
 var passport = require('passport')
     , LocalStrategy = require('passport-local').Strategy;
+var flash = require('connect-flash');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -13,7 +14,15 @@ var questionsRouter = require('./routes/questions');
 var signupRouter = require('./routes/sign-up');
 var signinRouter = require('./routes/signin');
 var signoutRouter = require('./routes/signout');
-var flash = require('connect-flash');
+var languageRouter = require('./routes/selectlanguage');
+
+//initialize internationalization
+var i18n = require("i18n");
+i18n.configure({
+    locales:['en', 'fr'],
+    defaultLocale: 'en',
+    directory: __dirname + '/locales'
+});
 //var jsonToDbRouter = require('./bin/jsonToDb');
 
 var app = express();
@@ -44,6 +53,7 @@ app.use('/questions', questionsRouter);
 app.use('/sign-up', signupRouter);
 app.use('/signin', signinRouter);
 app.use('/signout', signoutRouter);
+app.use('/selectlanguage', languageRouter);
 //app.use('/post-mcq', jsonToDbRouter);
 
 // catch 404 and forward to error handler

@@ -5,6 +5,7 @@ var passport = require('passport')
 const jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 const mysql = require('mysql');
+var i18n = require('i18n');
 
 /* POST login. */
 
@@ -60,17 +61,27 @@ passport.use(new LocalStrategy(function (username, password, done) {
 ));
 /* GET sign in page. */
 router.get('/', function (req, res, next) {
-    var signString = ""
-    var signUrl = ""
-    var message = req.flash('error')[0]
-    if (req.user) {
-        signString = "Sign Out"
-        signUrl = "signout"
+    i18n.init(req, res);
+    if (global.language == "en") {
+        i18n.setLocale('en');
+    } else if (global.language == "fr") {
+        i18n.setLocale('fr');
     } else {
-        signString = "Sign In"
-        signUrl = "signin"
+        global.language = "";
     }
-    res.render('signin', {sign_in_out: signString, sign_in_out_url: signUrl, message: message});
+    var signString = "";
+    var signUrl = "";
+    var message = req.flash('error')[0];
+    if (req.user) {
+        signString = i18n.__('sign out');
+        signUrl = "signout";
+    } else {
+        signString = i18n.__('sign in');;
+        signUrl = "signin";
+    }
+
+    var data = {language: global.language, message: message};
+    res.render('signin', {sign_in_out: signString, sign_in_out_url: signUrl, data: data});
     //next()
 });
 
