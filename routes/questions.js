@@ -2,16 +2,17 @@ var express = require('express');
 var router = express.Router();
 const mysql = require('mysql');
 var bodyParser = require('body-parser');
+var i18n = require('i18n');
 router.use(bodyParser.urlencoded({extended: false}));
 router.use(bodyParser.json());
 
-var questSelectedFilter = ["All questions", "My questions", "Other questions"]
-var mainSubjects = ["All subjects"]
-var questionsArray = []
-var resourceIdsForUser = []
-var ratingForResource = []
-var signString = ""
-var signUrl = ""
+var questSelectedFilter = ["All questions", "My questions", "Other questions"];
+var mainSubjects = ["All subjects"];
+var questionsArray = [];
+var resourceIdsForUser = [];
+var ratingForResource = [];
+var signString = "";
+var signUrl = "";
 var data;
 var currentUser = "";
 
@@ -28,6 +29,9 @@ function Question(questionID, questionText, questionType, imageName, rating, use
 
 /* GET questions page. */
 router.get('/', function (req, res, next) {
+
+    setLanguage(req, res);
+
     //reinit question array
     questionsArray = [];
 
@@ -71,7 +75,7 @@ router.get('/', function (req, res, next) {
             });
         }
 
-        con.query("SELECT * FROM short_answer_questions LIMIT 500;", function (err, rows) {
+        con.query("SELECT * FROM short_answer_questions WHERE LANGUAGE = '" + global.language + "' LIMIT 500;", function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
                 if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
@@ -84,7 +88,7 @@ router.get('/', function (req, res, next) {
             }
         });
 
-        con.query("SELECT * FROM multiple_choice_questions LIMIT 500;", function (err, rows) {
+        con.query("SELECT * FROM multiple_choice_questions WHERE LANGUAGE = '" + global.language + "' LIMIT 500;", function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
                 if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
@@ -115,7 +119,8 @@ router.get('/', function (req, res, next) {
                     ratingForResource.push(0)
                 }
             }
-            data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource};
+            data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
+                language: global.language};
             res.render('questions', {
                 sign_in_out: signString, sign_in_out_url: signUrl, data: data,
                 mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
@@ -126,6 +131,8 @@ router.get('/', function (req, res, next) {
 
 router.post('/', function (req, res) {
     console.log(req.body)
+
+    setLanguage(req, res);
 
     if (req.body.userRating) {
         //save user rating
@@ -204,7 +211,8 @@ router.post('/', function (req, res) {
                                 ratingForResource[index] = req.body.userRating
                             }
 
-                            data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource};
+                            data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
+                                language: global.language};
                             res.render('questions', {
                                 sign_in_out: signString, sign_in_out_url: signUrl, data: data,
                                 mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
@@ -221,15 +229,15 @@ router.post('/', function (req, res) {
         questionsArray = [];
         var shrtaqQuery = "SELECT * FROM short_answer_questions ";
         var mcqQuery = "SELECT * FROM multiple_choice_questions ";
-        var shrtaqArg = []
-        var mcqArg = []
+        var shrtaqArg = [];
+        var mcqArg = [];
 
-        console.log(req.body.subjectFilter)
+        console.log(req.body.subjectFilter);
         if (req.body.subjectFilter != "All subjects") {
             shrtaqQuery += "INNER JOIN `relation_question_subject` ON `short_answer_questions`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
             "INNER JOIN `subjects` ON `relation_question_subject`.`IDENTIFIER_SUBJECT` = `subjects`.`IDENTIFIER` " +
             "WHERE `subjects`.`SUBJECT` = ? ";
-            shrtaqArg.push(req.body.subjectFilter)
+            shrtaqArg.push(req.body.subjectFilter);
 
             mcqQuery += "INNER JOIN `relation_question_subject` ON `multiple_choice_questions`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
                 "INNER JOIN `subjects` ON `relation_question_subject`.`IDENTIFIER_SUBJECT` = `subjects`.`IDENTIFIER` " +
@@ -237,23 +245,31 @@ router.post('/', function (req, res) {
             mcqArg.push(req.body.subjectFilter)
 
             if (req.body.keyword != "") {
-                shrtaqQuery += " AND QUESTION LIKE ? ";
+                shrtaqQuery += " AND QUESTION LIKE ? AND short_answer_questions.LANGUAGE = ?";
                 shrtaqArg.push("%" + req.body.keyword + "%")
+                shrtaqArg.push(global.language);
 
-                mcqQuery += " AND QUESTION LIKE ? ";
+                mcqQuery += " AND QUESTION LIKE ? AND multiple_choice_questions.LANGUAGE = ?";
                 mcqArg.push("%" + req.body.keyword + "%")
+                mcqArg.push(global.language);
+            } else {
+                shrtaqQuery += " AND short_answer_questions.LANGUAGE = ?";
+                shrtaqArg.push(global.language);
+
+                mcqQuery += " AND multiple_choice_questions.LANGUAGE = ?";
+                mcqArg.push(global.language);
             }
 
             shrtaqQuery += " LIMIT 500"
             mcqQuery += " LIMIT 500"
-        }
+        } else if (req.body.subjectFilter == "All subjects" && req.body.keyword != "") {
+            shrtaqQuery += "WHERE QUESTION LIKE ? AND short_answer_questions.LANGUAGE = ?";
+            shrtaqArg.push("%" + req.body.keyword + "%");
+            shrtaqArg.push(global.language);
 
-        if (req.body.subjectFilter == "All subjects" && req.body.keyword != "") {
-            shrtaqQuery += "WHERE QUESTION LIKE ? ";
-            shrtaqArg.push("%" + req.body.keyword + "%")
-
-            mcqQuery += "WHERE QUESTION LIKE ? ";
-            mcqArg.push("%" + req.body.keyword + "%")
+            mcqQuery += "WHERE QUESTION LIKE ? AND multiple_choice_questions.LANGUAGE = ?";
+            mcqArg.push("%" + req.body.keyword + "%");
+            mcqArg.push(global.language);
         }
 
 
@@ -311,7 +327,7 @@ router.post('/', function (req, res) {
             });
 
             //get user rating
-            con.query("SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_USER=?",req.user, function (err, rows) {
+            con.query("SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_USER=?",[req.user], function (err, rows) {
                 if (err) throw err;
 
                 var ratingForResourceDictonary = {}
@@ -339,7 +355,8 @@ router.post('/', function (req, res) {
                     }
                 }
 
-                data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource};
+                data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
+                    language: global.language};
                 res.render('questions', {
                     sign_in_out: signString, sign_in_out_url: signUrl, data: data,
                     mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
@@ -432,12 +449,25 @@ router.post('/', function (req, res) {
             currentUser = ""
         }
 
-        data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource};
+        data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
+            language: global.language};
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, data: data,
             mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
         });
     }
 });
+
+function setLanguage(req, res) {
+    //set language
+    i18n.init(req, res);
+    if (global.language == "en") {
+        i18n.setLocale('en');
+    } else if (global.language == "fr") {
+        i18n.setLocale('fr');
+    } else {
+        global.language = 'en';
+    }
+}
 
 module.exports = router;

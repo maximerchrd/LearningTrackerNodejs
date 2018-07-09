@@ -138,15 +138,15 @@ CREATE TABLE IF NOT EXISTS relation_resource_user_rating (ID INT NOT NULL AUTO_I
 
 
 
-INSERT INTO multiple_choice_questions (QUESTION,OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS,IMAGE_PATH,RATING,IDENTIFIER)
+INSERT INTO multiple_choice_questions (QUESTION,OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS,IMAGE_PATH,RATING,IDENTIFIER,LANGUAGE)
 VALUES("What alternative to mice experimentation was recently improved by the EPFL?",
-"nematodes","monkeys","rats","bacterias","cats","","","","","","1","app-image_1.jpg","4.64","123456789101237");
+"nematodes","monkeys","rats","bacterias","cats","","","","","","1","app-image_1.jpg","4.64","123456789101237","en");
 
-INSERT INTO short_answer_questions (QUESTION,IMAGE_PATH,RATING,IDENTIFIER)
-VALUES("What are the closest planets to earth?","goal.jpg","4","123456789101230");
+INSERT INTO short_answer_questions (QUESTION,IMAGE_PATH,RATING,IDENTIFIER,LANGUAGE)
+VALUES("What are the closest planets to earth?","goal.jpg","4","123456789101230","fr");
 
-INSERT INTO short_answer_questions (QUESTION,IMAGE_PATH,RATING,IDENTIFIER)
-VALUES("Try to answer nothing to this","goal.jpg","2.36","223456789101230");
+INSERT INTO short_answer_questions (QUESTION,IMAGE_PATH,RATING,IDENTIFIER,LANGUAGE)
+VALUES("Try to answer nothing to this","goal.jpg","2.36","223456789101230","en");
 
 INSERT INTO answer_options (ANSWER_OPTION,IDENTIFIER)
 VALUES("Venus","123456789101231");
@@ -200,9 +200,9 @@ wholeblock:BEGIN
   REPEAT
     SET x = x - 1;
     SET y = x % 5;
-    INSERT INTO multiple_choice_questions (QUESTION,OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS,IMAGE_PATH,RATING,IDENTIFIER)
+    INSERT INTO multiple_choice_questions (QUESTION,OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS,IMAGE_PATH,RATING,IDENTIFIER,LANGUAGE)
         VALUES(x,
-        "nematodes","monkeys","rats","bacterias","cats","","","","","","1","app-image_1.jpg",y,x);
+        "nematodes","monkeys","rats","bacterias","cats","","","","","","1","app-image_1.jpg",y,x,"fr");
     UNTIL x <= 0
   END REPEAT;
 END//

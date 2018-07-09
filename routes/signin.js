@@ -61,14 +61,16 @@ passport.use(new LocalStrategy(function (username, password, done) {
 ));
 /* GET sign in page. */
 router.get('/', function (req, res, next) {
+    //set language
     i18n.init(req, res);
     if (global.language == "en") {
         i18n.setLocale('en');
     } else if (global.language == "fr") {
         i18n.setLocale('fr');
     } else {
-        global.language = "";
+        global.language = "en";
     }
+
     var signString = "";
     var signUrl = "";
     var message = req.flash('error')[0];
