@@ -41,7 +41,7 @@ router.post('/', function(req, res) {
             });
 
 
-            res.render('sign-up-success', { title: 'Sign Up' });
+            res.render('signin', { title: 'Sign Up' , message: 'You registered successfully!', sign_in_out: 'Sign in'});
         } else {
             res.render('sign-up', { title: 'PW MISMATCH' });
         }
