@@ -2,12 +2,19 @@ extends layout
 
 block content
     include partials/header.pug
-    form(method='POST' action='/signin' class="form_sign")
-        div.form-group
-            label(for='name') User Name:<br/>
-            input#name.form-control(type='text', placeholder='username' name='username')
-        div.form-group
-            label(for='pw') Password:<br/>
-            input#pw.form-control(type='password' name='password')
-        button.btn.btn-primary(type='submit') Sign in
-    div(=failure_message) #{data.message}
+    div.sign-container
+        form(method='POST' action='/signin' class="form_signin")
+            div.row
+                div.col-50
+                    label(for='name' class='label-text') User Name:<br/>
+                div.col-50
+                    input#name.form-control(type='text', placeholder='username' name='username')
+            div.row
+                div.col-50
+                    label(for='pw' class='label-text') Password:<br/>
+                div.col-50
+                    input#pw.form-control(type='password' name='password')
+            div.row
+                div.col-center
+                    button.btn.btn-primary(type='submit' class='standard-button') Sign in
+        div(=failure_message) #{data.message}
