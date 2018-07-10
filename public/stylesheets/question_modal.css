@@ -39,3 +39,36 @@
     transform: scale(1.0);
     transition: visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s;
 }
+.question-label {
+    float: left;
+    width: 25%;
+    margin-top: 10px;
+    font-style: italic;
+}
+.star-label {
+    float: left;
+    width: 30%;
+    margin-top: 10px;
+    font-style: italic;
+}
+.question-text {
+    float: left;
+    width: 75%;
+    margin-top: 10px;
+    display: inline-block;
+}
+.question-type {
+    float: left;
+    width: 75%;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+.form-rating {
+    padding: 15px 0;
+    text-align: center;
+}

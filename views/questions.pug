@@ -55,27 +55,35 @@ block content
     .modal
         .modal-content
             span(class="close-button", onclick="toggleModalClose()") &times;
-            .question-text some text
-            .question-type some type
+            div.row(style='margin-top: 30px;')
+                div.question-label Question:
+                div.question-text some text
+            div.row
+                div.question-label Type:
+                div.question-type some type
             img(src="/users_images/", id="questionImage")
-            div(class='stars') Average rating:
-                span(class="star" id="star1")
-                span(class="star" id="star2")
-                span(class="star" id="star3")
-                span(class="star" id="star4")
-                span(class="star" id="star5")
-            div(class='stars') Your rating:
-                span(class="star" id="ustar1" onclick='rate1star()')
-                span(class="star" id="ustar2" onclick='rate2stars()')
-                span(class="star" id="ustar3" onclick='rate3stars()')
-                span(class="star" id="ustar4" onclick='rate4stars()')
-                span(class="star" id="ustar5" onclick='rate5stars()')
-            form(method='POST' action='/questions' class="form_sign")
+            div.row
+                div.star-label Average rating:
+                div(class='stars')
+                    span(class="star" id="star1")
+                    span(class="star" id="star2")
+                    span(class="star" id="star3")
+                    span(class="star" id="star4")
+                    span(class="star" id="star5")
+            div.row
+                div.star-label Your rating:
+                div(class='stars')
+                    span(class="star" id="ustar1" onclick='rate1star()')
+                    span(class="star" id="ustar2" onclick='rate2stars()')
+                    span(class="star" id="ustar3" onclick='rate3stars()')
+                    span(class="star" id="ustar4" onclick='rate4stars()')
+                    span(class="star" id="ustar5" onclick='rate5stars()')
+            form(method='POST' action='/questions' class="form-rating")
                 input(type='text' hidden=true name='userRating' value='' id='userRating')
                 input(type='text' hidden=true name='questionRated' value='' id='questionRated')
                 input(type='text' hidden=true name='questionType' value='' id='questionType')
-                button(type='submit', id='submitRating') Submit my rating
-            button.button-select(onclick="selectQuestion()") Select Question
+                button(type='submit', id='submitRating' class='small-button') Submit my rating
+            button.button-select(onclick="selectQuestion()" class='small-button' style='margin-top: 30px') Select Question
 
     script(type='text/javascript').
         src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"
