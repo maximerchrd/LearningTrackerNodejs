@@ -14,12 +14,12 @@ block content
         div.form-group
             input#keyword.form-control(type='keyword', placeholder='key word', name='keyword')
         div.form-group
-            button.btn.btn-primary(type='submit') Search
+            button.btn.btn-primary(type='submit' class='small-button') Search
 
     form(method='POST' action='/questions' class="form_sign")
         input(type='text' hidden=true name='selectedQuestions' value='' id='selectedQuestionsField')
         input(type='text' hidden=true name='unselectedQuestions' value='' id='unselectedQuestionsField')
-        button(type='submit', id='saveChangesButton') Save my Changes
+        button(type='submit', id='saveChangesButton' class='standard-button') Save my Changes
 
     table(style='width:40%', border='1', id='questions_table')
         thead
@@ -50,7 +50,8 @@ block content
                     td
                         img(id="checkboxImage" + i, src="/images/" + data.questions[i].userSelected)
             - }
-    button(onclick='loadMoreQuestions()') Load more Questions
+    div.center-div
+        button(onclick='loadMoreQuestions()' class='small-button') Load more Questions
     .modal
         .modal-content
             span(class="close-button", onclick="toggleModalClose()") &times;

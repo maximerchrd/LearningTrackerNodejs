@@ -23,6 +23,14 @@ a {
   border-radius: 4px;
   font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
+.small-button {
+  background-color: #00e6a1;
+  color: white;
+  padding: 3px 10px;
+  border: none;
+  border-radius: 2px;
+  font: 12px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
 .form-inline {
   padding: 40px 0;
   text-align: center;
@@ -30,6 +38,10 @@ a {
 .form_sign {
   padding: 40px 0;
   text-align: center;
+}
+.center-div {
+  margin: 20px auto;
+  width: 200px;
 }
 
 div.form-group {
@@ -43,7 +55,7 @@ div.form-group {
   border-collapse: collapse;
   width: 100%;
   margin: auto;
-  margin-top: 40px;
+  margin-top: 20px;
 }
 
 #questions_table td, #questions_table th {
