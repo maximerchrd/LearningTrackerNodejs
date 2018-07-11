@@ -90,7 +90,11 @@ function setTranslation() {
     var translation = {
         sign_up: i18n.__('sign up'),
         questions: i18n.__('questions'),
-        home: i18n.__('home')
+        home: i18n.__('home'),
+        user_name: i18n.__('user name'),
+        password: i18n.__('password'),
+        email: i18n.__('email'),
+        confirm_password: i18n.__('confirm_password')
     }
     return translation
 }

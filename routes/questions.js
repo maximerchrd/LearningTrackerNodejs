@@ -479,7 +479,20 @@ function setTranslation() {
     var translation = {
         sign_up: i18n.__('sign up'),
         questions: i18n.__('questions'),
-        home: i18n.__('home')
+        home: i18n.__('home'),
+        save_changes: i18n.__('save changes'),
+        search: i18n.__('search'),
+        question: i18n.__('question'),
+        question_type: i18n.__('question type'),
+        picture: i18n.__('picture'),
+        rating: i18n.__('rating'),
+        my_questions: i18n.__('my questions'),
+        load_more_questions: i18n.__('load more questions'),
+        type: i18n.__('type'),
+        average_rating: i18n.__('average rating'),
+        your_rating: i18n.__('your rating'),
+        submit_my_rating: i18n.__('submit my rating'),
+        select_question: i18n.__('select question')
     }
     return translation
 }

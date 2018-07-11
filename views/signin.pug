@@ -6,15 +6,15 @@ block content
         form(method='POST' action='/signin' class="form_signin")
             div.row
                 div.col-50
-                    label(for='name' class='label-text') User Name:<br/>
+                    label(for='name' class='label-text') #{translation.user_name}:
                 div.col-50
                     input#name.form-control(type='text', placeholder='username' name='username')
             div.row
                 div.col-50
-                    label(for='pw' class='label-text') Password:<br/>
+                    label(for='pw' class='label-text') #{translation.password}:
                 div.col-50
                     input#pw.form-control(type='password' name='password')
             div.row
                 div.col-center
-                    button.btn.btn-primary(type='submit' class='standard-button') Sign in
+                    button.btn.btn-primary(type='submit' class='standard-button') #{translation.sign_in}
         div(=failure_message) #{data.message}

@@ -7,24 +7,24 @@ block content
         form(method='POST' action='/sign-up' class="form_signin")
             div.row
                 div.col-50
-                    label(for='name') User Name:<br/>
+                    label(for='name') #{translation.user_name}
                 div.col-50
                     input#name.form-control(type='text', placeholder='username' name='username')
             div.row
                 div.col-50
-                    label(for='email') Email:<br/>
+                    label(for='email') #{translation.email}
                 div.col-50
                     input#email.form-control(type='email', placeholder='name@email.com' name='email')
             div.row
                 div.col-50
-                    label(for='pw') Password:<br/>
+                    label(for='pw') #{translation.password}
                 div.col-50
                     input#pw.form-control(type='password' name='password')
             div.row
                 div.col-50
-                    label(for='pw2') Confirm Password:<br/>
+                    label(for='pw2') #{translation.confirm_password}
                 div.col-50
                     input#pw2.form-control(type='password' name='confirmPassword')
             div.row
                 div.col-center
-                    button.btn.btn-primary(type='submit') Sign up
+                    button.btn.btn-primary(type='submit' class='standard-button') #{translation.sign_up}

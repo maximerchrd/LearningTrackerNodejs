@@ -14,21 +14,21 @@ block content
         div.form-group
             input#keyword.form-control(type='keyword', placeholder='key word', name='keyword')
         div.form-group
-            button.btn.btn-primary(type='submit' class='small-button') Search
+            button.btn.btn-primary(type='submit' class='small-button') #{translation.search}
 
     form(method='POST' action='/questions' class="form_sign")
         input(type='text' hidden=true name='selectedQuestions' value='' id='selectedQuestionsField')
         input(type='text' hidden=true name='unselectedQuestions' value='' id='unselectedQuestionsField')
-        button(type='submit', id='saveChangesButton' class='standard-button') Save my Changes
+        button(type='submit', id='saveChangesButton' class='standard-button') #{translation.save_changes}
 
     table(style='width:40%', border='1', id='questions_table')
         thead
             tr
-                th Question
-                th Question Type
-                th Picture
-                th(width="120px") Rating
-                th My Questions
+                th #{translation.question}
+                th #{translation.question_type}
+                th #{translation.picture}
+                th(width="120px") #{translation.rating}
+                th #{translation.my_questions}
         tbody
             - var maxIndex = 10
             - if (data.questions.length < 10) {
@@ -51,19 +51,19 @@ block content
                         img(id="checkboxImage" + i, src="/images/" + data.questions[i].userSelected)
             - }
     div.center-div
-        button(onclick='loadMoreQuestions()' class='small-button') Load more Questions
+        button(onclick='loadMoreQuestions()' class='small-button') #{translation.load_more_questions}
     .modal
         .modal-content
             span(class="close-button", onclick="toggleModalClose()") &times;
             div.row(style='margin-top: 30px;')
-                div.question-label Question:
+                div.question-label #{translation.question}:
                 div.question-text some text
             div.row
-                div.question-label Type:
+                div.question-label #{translation.type}:
                 div.question-type some type
             img(src="/users_images/", id="questionImage")
             div.row
-                div.star-label Average rating:
+                div.star-label #{translation.average_rating}:
                 div(class='stars')
                     span(class="star" id="star1")
                     span(class="star" id="star2")
@@ -71,7 +71,7 @@ block content
                     span(class="star" id="star4")
                     span(class="star" id="star5")
             div.row
-                div.star-label Your rating:
+                div.star-label #{translation.your_rating}:
                 div(class='stars')
                     span(class="star" id="ustar1" onclick='rate1star()')
                     span(class="star" id="ustar2" onclick='rate2stars()')
@@ -82,8 +82,8 @@ block content
                 input(type='text' hidden=true name='userRating' value='' id='userRating')
                 input(type='text' hidden=true name='questionRated' value='' id='questionRated')
                 input(type='text' hidden=true name='questionType' value='' id='questionType')
-                button(type='submit', id='submitRating' class='small-button') Submit my rating
-            button.button-select(onclick="selectQuestion()" class='small-button' style='margin-top: 30px') Select Question
+                button(type='submit', id='submitRating' class='small-button') #{translation.submit_my_rating}
+            button.button-select(onclick="selectQuestion()" class='small-button' style='margin-top: 30px') #{translation.select_question}
 
     script(type='text/javascript').
         src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"

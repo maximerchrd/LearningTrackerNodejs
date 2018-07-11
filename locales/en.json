@@ -8,5 +8,22 @@
   "sign out": "Sign Out",
   "sign up": "Sign Up",
   "questions": "Questions",
-  "home": "Home"
+  "home": "Home",
+  "user name": "User Name",
+  "password": "Password",
+  "email": "Email",
+  "confirm_password": "Confirm Password",
+  "save changes": "Save my Changes",
+  "search": "Search",
+  "question": "Question",
+  "question type": "Question Type",
+  "picture": "Picture",
+  "rating": "Rating",
+  "my questions": "My Questions",
+  "load more questions": "Load more Questions",
+  "type": "Type",
+  "average rating": "Average Rating",
+  "your rating": "Your Rating",
+  "submit my rating": "Submit my rating",
+  "select question": "Select Question"
 }
