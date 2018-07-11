@@ -78,13 +78,24 @@ router.get('/', function (req, res, next) {
         signString = i18n.__('sign out');
         signUrl = "signout";
     } else {
-        signString = i18n.__('sign in');;
+        signString = i18n.__('sign in');
         signUrl = "signin";
     }
 
     var data = {language: global.language, message: message};
-    res.render('signin', {sign_in_out: signString, sign_in_out_url: signUrl, data: data});
+    var translation = setTranslation();
+
+    res.render('signin', {sign_in_out: signString, sign_in_out_url: signUrl, data: data, translation: translation});
     //next()
 });
+
+function setTranslation() {
+    var translation = {
+        sign_up: i18n.__('sign up'),
+        questions: i18n.__('questions'),
+        home: i18n.__('home')
+    }
+    return translation
+}
 
 module.exports = router;

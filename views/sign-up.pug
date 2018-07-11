@@ -3,17 +3,28 @@ extends layout
 block content
     include partials/header.pug
     // register form
-    form(method='POST' action='/sign-up' class="form_sign")
-        div.form-group
-            label(for='name') User Name:<br/>
-            input#name.form-control(type='text', placeholder='username' name='username')
-        div.form-group
-            label(for='email') Email:<br/>
-            input#email.form-control(type='email', placeholder='name@email.com' name='email')
-        div.form-group
-            label(for='pw') Password:<br/>
-            input#pw.form-control(type='password' name='password')
-        div.form-group
-            label(for='pw2') Confirm Password:<br/>
-            input#pw2.form-control(type='password' name='confirmPassword')
-        button.btn.btn-primary(type='submit') Sign up
+    div.sign-container
+        form(method='POST' action='/sign-up' class="form_signin")
+            div.row
+                div.col-50
+                    label(for='name') User Name:<br/>
+                div.col-50
+                    input#name.form-control(type='text', placeholder='username' name='username')
+            div.row
+                div.col-50
+                    label(for='email') Email:<br/>
+                div.col-50
+                    input#email.form-control(type='email', placeholder='name@email.com' name='email')
+            div.row
+                div.col-50
+                    label(for='pw') Password:<br/>
+                div.col-50
+                    input#pw.form-control(type='password' name='password')
+            div.row
+                div.col-50
+                    label(for='pw2') Confirm Password:<br/>
+                div.col-50
+                    input#pw2.form-control(type='password' name='confirmPassword')
+            div.row
+                div.col-center
+                    button.btn.btn-primary(type='submit') Sign up

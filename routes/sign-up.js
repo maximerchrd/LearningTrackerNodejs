@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 const mysql = require('mysql');
+var i18n = require('i18n');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
@@ -40,29 +41,58 @@ router.post('/', function(req, res) {
                 });
             });
 
-
-            res.render('signin', { title: 'Sign Up' , message: 'You registered successfully!', sign_in_out: 'Sign in'});
+            var data = {language: global.language};
+            var translation = setTranslation();
+            res.render('signin', { title: 'Sign Up' , message: 'You registered successfully!', sign_in_out: i18n.__('sign in'), data: data, translation: translation});
         } else {
-            res.render('sign-up', { title: 'PW MISMATCH' });
+            var data = {language: global.language};
+            var translation = setTranslation();
+            res.render('sign-up', { title: 'PW MISMATCH', sign_in_out: i18n.__('sign in'), data: data, translation: translation});
         }
     } else {
-        res.render('sign-up', { title: 'ERROR' });
+        var data = {language: global.language};
+        var translation = setTranslation();
+        res.render('sign-up', { title: 'ERROR', sign_in_out: i18n.__('sign in'), data: data, translation: translation});
     }
 
 });
 
 /* GET sign up page. */
 router.get('/', function(req, res, next) {
-    var signString = ""
-    var signUrl = ""
+    setLanguage(req,res);
+
+    var signString = "";
+    var signUrl = "";
     if (req.user) {
-        signString = "Sign Out"
+        signString = i18n.__('sign out');
         signUrl = "signout"
     } else {
-        signString = "Sign In"
+        signString = i18n.__('sign in');
         signUrl = "signin"
     }
-    res.render('sign-up', { sign_in_out: signString, sign_in_out_url: signUrl });
+    var data = {language: global.language};
+    var translation = setTranslation();
+    res.render('sign-up', { sign_in_out: signString, sign_in_out_url: signUrl, data: data, translation: translation});
 });
+
+function setLanguage(req,res) {
+    i18n.init(req, res);
+    if (global.language == "en") {
+        i18n.setLocale('en');
+    } else if (global.language == "fr") {
+        i18n.setLocale('fr');
+    } else {
+        global.language = "en";
+    }
+}
+
+function setTranslation() {
+    var translation = {
+        sign_up: i18n.__('sign up'),
+        questions: i18n.__('questions'),
+        home: i18n.__('home')
+    }
+    return translation
+}
 
 module.exports = router;

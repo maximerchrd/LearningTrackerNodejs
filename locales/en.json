@@ -5,5 +5,8 @@
     "other": "You have %s messages"
   },
   "sign in": "Sign In",
-  "sign out": "Sign Out"
+  "sign out": "Sign Out",
+  "sign up": "Sign Up",
+  "questions": "Questions",
+  "home": "Home"
 }

@@ -14,6 +14,7 @@ var ratingForResource = [];
 var signString = "";
 var signUrl = "";
 var data;
+var translation;
 var currentUser = "";
 
 //define question object
@@ -102,13 +103,13 @@ router.get('/', function (req, res, next) {
 
 
             if (req.user) {
-                signString = "Sign Out"
-                signUrl = "signout"
-                currentUser = req.user
+                signString = i18n.__('sign out');
+                signUrl = "signout";
+                currentUser = req.user;
             } else {
-                signString = "Sign In"
-                signUrl = "signin"
-                currentUser = ""
+                signString = i18n.__('sign in');
+                signUrl = "signin";
+                currentUser = "";
             }
 
             //fill array containing the rating for each question using the dictionary as source
@@ -121,8 +122,9 @@ router.get('/', function (req, res, next) {
             }
             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
                 language: global.language};
+            translation = setTranslation();
             res.render('questions', {
-                sign_in_out: signString, sign_in_out_url: signUrl, data: data,
+                sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
                 mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
             });
         });
@@ -191,11 +193,11 @@ router.post('/', function (req, res) {
                             if (err) throw err;
 
                             if (req.user) {
-                                signString = "Sign Out"
+                                signString = i18n.__('sign out');
                                 signUrl = "signout"
                                 currentUser = req.user
                             } else {
-                                signString = "Sign In"
+                                signString = i18n.__('sign in');
                                 signUrl = "signin"
                                 currentUser = ""
                             }
@@ -213,8 +215,9 @@ router.post('/', function (req, res) {
 
                             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
                                 language: global.language};
+                            translation = setTranslation();
                             res.render('questions', {
-                                sign_in_out: signString, sign_in_out_url: signUrl, data: data,
+                                sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
                                 mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
                             });
                         });
@@ -337,13 +340,13 @@ router.post('/', function (req, res) {
                 }
 
                 if (req.user) {
-                    signString = "Sign Out"
-                    signUrl = "signout"
-                    currentUser = req.user
+                    signString = i18n.__('sign out');
+                    signUrl = "signout";
+                    currentUser = req.user;
                 } else {
-                    signString = "Sign In"
-                    signUrl = "signin"
-                    currentUser = ""
+                    signString = i18n.__('sign in');
+                    signUrl = "signin";
+                    currentUser = "";
                 }
 
                 //fill array containing the rating for each question using the dictionary as source
@@ -357,8 +360,9 @@ router.post('/', function (req, res) {
 
                 data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
                     language: global.language};
+                translation = setTranslation();
                 res.render('questions', {
-                    sign_in_out: signString, sign_in_out_url: signUrl, data: data,
+                    sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
                     mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
                 });
             });
@@ -451,8 +455,9 @@ router.post('/', function (req, res) {
 
         data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
             language: global.language};
+        translation = setTranslation();
         res.render('questions', {
-            sign_in_out: signString, sign_in_out_url: signUrl, data: data,
+            sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
             mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
         });
     }
@@ -468,6 +473,15 @@ function setLanguage(req, res) {
     } else {
         global.language = 'en';
     }
+}
+
+function setTranslation() {
+    var translation = {
+        sign_up: i18n.__('sign up'),
+        questions: i18n.__('questions'),
+        home: i18n.__('home')
+    }
+    return translation
 }
 
 module.exports = router;

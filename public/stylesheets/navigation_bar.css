@@ -25,11 +25,11 @@ li a:hover {
     background-color: #00e6a1;
     border: none;
     color: white;
-    padding: 15px 32px;
+    padding: 10px 52px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 19px;
+    font-size: 22px;
 }
 .sign_item {
     float: right;

@@ -5,5 +5,8 @@
     "other": "You have %s messages"
   },
   "sign in": "Se connecter",
-  "sign out": "Se déconnecter"
+  "sign out": "Se déconnecter",
+  "sign up": "S'inscrire",
+  "questions": "Questions",
+  "home": "Accueil"
 }
