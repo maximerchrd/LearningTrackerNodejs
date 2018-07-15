@@ -288,7 +288,7 @@ router.post('/', function (req, res) {
         con.connect(function (err) {
             if (err) throw err;
 
-            questionsArray = []
+            questionsArray = [];
             con.query(shrtaqQuery, shrtaqArg, function (err, rows) {
                 if (err) throw err;
                 for (var i in rows) {
@@ -493,7 +493,7 @@ function setTranslation() {
         your_rating: i18n.__('your rating'),
         submit_my_rating: i18n.__('submit my rating'),
         select_question: i18n.__('select question')
-    }
+    };
     return translation
 }
 

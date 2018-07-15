@@ -24,8 +24,8 @@ router.post('/', function(req, res) {
 
             //do mysql stuffs
             var sql = "INSERT IGNORE INTO users (IDENTIFIER, username, email, password) VALUES ('" + hashedPassword.substring(1, 15)  +
-                "', ?, ?, '" + hashedPassword + "');"
-            var sqlArgs = [req.body.username, req.body.email]
+                "', ?, ?, '" + hashedPassword + "');";
+            var sqlArgs = [req.body.username, req.body.email];
             // First you need to create a connection to the db
             const con = mysql.createConnection({
                 host: 'localhost',

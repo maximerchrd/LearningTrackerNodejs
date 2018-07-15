@@ -1,0 +1,18 @@
+extends layout
+
+block content
+    include partials/header.pug
+    // register form
+    div(class='sign-container' style='width: 350px;')
+        form(method='POST' action='/user_profile' class="form_signin")
+            div.row
+                div.col-50
+                    label(for='name') #{translation.user_name}
+                div.col-50
+                    input#name.form-control(type='text', placeholder='username' name='username' value=data.user disabled=true)
+
+            div.row
+                div.col-50
+                    input#synckey.form-control(type='text', placeholder='sync key' name='synckey' value=data.synckey onclick="this.focus();this.select()" readonly="readonly")
+                div.col-50
+                    button.btn.btn-primary(type='submit' class='small-button') Generate new Synchronization Key

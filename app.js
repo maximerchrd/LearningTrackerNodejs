@@ -15,6 +15,7 @@ var signupRouter = require('./routes/sign-up');
 var signinRouter = require('./routes/signin');
 var signoutRouter = require('./routes/signout');
 var languageRouter = require('./routes/selectlanguage');
+var userProfileRouter = require('./routes/user_profile');
 
 //initialize internationalization
 var i18n = require("i18n");
@@ -54,6 +55,7 @@ app.use('/sign-up', signupRouter);
 app.use('/signin', signinRouter);
 app.use('/signout', signoutRouter);
 app.use('/selectlanguage', languageRouter);
+app.use('/user_profile', userProfileRouter);
 //app.use('/post-mcq', jsonToDbRouter);
 
 // catch 404 and forward to error handler
