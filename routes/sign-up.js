@@ -3,6 +3,7 @@ var router = express.Router();
 var bodyParser = require('body-parser');
 const mysql = require('mysql');
 var i18n = require('i18n');
+var shortid = require('shortid');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
@@ -22,10 +23,11 @@ router.post('/', function(req, res) {
         if (req.body.password === req.body.confirmPassword) {
             var hashedPassword = bcrypt.hashSync(req.body.password, 12);
 
+            var uniqueId = shortid.generate();
+
             //do mysql stuffs
-            var sql = "INSERT IGNORE INTO users (IDENTIFIER, username, email, password) VALUES ('" + hashedPassword.substring(1, 15)  +
-                "', ?, ?, '" + hashedPassword + "');";
-            var sqlArgs = [req.body.username, req.body.email];
+            var sql = "INSERT IGNORE INTO users (IDENTIFIER, username, email, password) VALUES (?, ?, ?, ?);";
+            var sqlArgs = [uniqueId, req.body.username, req.body.email, hashedPassword];
             // First you need to create a connection to the db
             const con = mysql.createConnection({
                 host: 'localhost',
