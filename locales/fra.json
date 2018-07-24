@@ -25,5 +25,6 @@
 	"average rating": "Note Moyenne",
 	"your rating": "Votre Note",
 	"submit my rating": "Soumettre ma Note",
-	"select question": "Sélectionner la Question"
+	"select question": "Sélectionner la Question",
+	"answer %s": "Réponse %s"
 }

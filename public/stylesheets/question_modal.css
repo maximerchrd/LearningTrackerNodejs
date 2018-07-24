@@ -13,12 +13,12 @@
 }
 .modal-content {
     position: absolute;
-    top: 50%;
+    top: 4rem;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, 0%);
     background-color: white;
     padding: 1rem 1.5rem;
-    width: 24rem;
+    width: 28rem;
     border-radius: 0.5rem;
 }
 .close-button {
@@ -57,11 +57,17 @@
     margin-top: 10px;
     display: inline-block;
 }
+.answer-option {
+    float: left;
+    width: 45%;
+    margin-top: 10px;
+    margin-right: 1rem;
+}
 .question-type {
     float: left;
     width: 75%;
     margin-top: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 .row:after {
     content: "";

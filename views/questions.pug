@@ -52,15 +52,30 @@ block content
             - }
     div.center-div
         button(onclick='loadMoreQuestions()' class='small-button') #{translation.load_more_questions}
-    .modal
+    .modal(style="overflow:scroll;")
         .modal-content
             span(class="close-button", onclick="toggleModalClose()") &times;
             div.row(style='margin-top: 30px;')
+                div.question-label #{translation.type}:
+                div.question-type some type
+            div.row
                 div.question-label #{translation.question}:
                 div.question-text some text
             div.row
-                div.question-label #{translation.type}:
-                div.question-type some type
+                div.answer-option(id="answer1")
+                div.answer-option(id="answer2")
+            div.row
+                div.answer-option(id="answer3")
+                div.answer-option(id="answer4")
+            div.row
+                div.answer-option(id="answer5")
+                div.answer-option(id="answer6")
+            div.row
+                div.answer-option(id="answer7")
+                div.answer-option(id="answer8")
+            div.row
+                div.answer-option(id="answer9")
+                div.answer-option(id="answer10")
             img(src="/users_images/", id="questionImage")
             div.row
                 div.star-label #{translation.average_rating}:
@@ -94,7 +109,7 @@ block content
         var rateButton = document.getElementById("submitRating");
 
         var questionsArray = !{JSON.stringify(data.questions)};
-        var ratingForResource = !{JSON.stringify(data.ratingForResource)}
+        var ratingForResource = !{JSON.stringify(data.ratingForResource)};
         var selectedQuestions = [[]];
         var unselectedQuestions = [];
         var currentQuestionIndex = 0;
@@ -137,6 +152,49 @@ block content
             }
             currentQuestionIndex = index;
             question_text.innerHTML = questionsArray[index].questionText;
+            //START SETTING ANSER OPTIONS
+            var color = "blue";
+            if (questionsArray[index].answers[0] != " ") {
+                if (questionsArray[index].nbCorrectAnswers > 0) { color = "#40ff00"; } else if (questionsArray[index].nbCorrectAnswers > -1) {color = "red"; }
+                answer1.innerHTML = "<font color='" + color + "'><i>#{translation.answer1}:</i><br></font>" + questionsArray[index].answers[0];
+            }
+            if (questionsArray[index].answers[1] != " ") {
+                if (questionsArray[index].nbCorrectAnswers > 1) { color = "#40ff00"; } else if (questionsArray[index].nbCorrectAnswers > -1) {color = "red"; }
+                answer2.innerHTML = "<font color='" + color + "'><i>#{translation.answer2}:</i><br></font>" + questionsArray[index].answers[1];
+            }
+            if (questionsArray[index].answers[2] != undefined) {
+                if (questionsArray[index].nbCorrectAnswers > 2) { color = "#40ff00"; } else if (questionsArray[index].nbCorrectAnswers > -1) {color = "red"; }
+                answer3.innerHTML = "<font color='" + color + "'><i>#{translation.answer3}:</i><br></font>" + questionsArray[index].answers[2];
+            }
+            if (questionsArray[index].answers[3] != undefined) {
+                if (questionsArray[index].nbCorrectAnswers > 3) { color = "#40ff00"; } else if (questionsArray[index].nbCorrectAnswers > -1) {color = "red"; }
+                answer4.innerHTML = "<font color='" + color + "'><i>#{translation.answer4}:</i><br></font>" + questionsArray[index].answers[3];
+            }
+            if (questionsArray[index].answers[4] != undefined) {
+                if (questionsArray[index].nbCorrectAnswers > 4) { color = "#40ff00"; } else if (questionsArray[index].nbCorrectAnswers > -1) {color = "red"; }
+                answer5.innerHTML = "<font color='" + color + "'><i>#{translation.answer5}:</i><br></font>" + questionsArray[index].answers[4];
+            }
+            if (questionsArray[index].answers[5] != undefined) {
+                if (questionsArray[index].nbCorrectAnswers > 5) { color = "#40ff00"; } else if (questionsArray[index].nbCorrectAnswers > -1) {color = "red"; }
+                answer6.innerHTML = "<font color='" + color + "'><i>#{translation.answer6}:</i><br></font>" + questionsArray[index].answers[5];
+            }
+            if (questionsArray[index].answers[6] != undefined) {
+                if (questionsArray[index].nbCorrectAnswers > 6) { color = "#40ff00"; } else if (questionsArray[index].nbCorrectAnswers > -1) {color = "red"; }
+                answer7.innerHTML = "<font color='" + color + "'><i>#{translation.answer7}:</i><br></font>" + questionsArray[index].answers[6];
+            }
+            if (questionsArray[index].answers[7] != undefined) {
+                if (questionsArray[index].nbCorrectAnswers > 7) { color = "#40ff00"; } else if (questionsArray[index].nbCorrectAnswers > -1) {color = "red"; }
+                answer8.innerHTML = "<font color='" + color + "'><i>#{translation.answer8}:</i><br></font>" + questionsArray[index].answers[7];
+            }
+            if (questionsArray[index].answers[8] != undefined) {
+                if (questionsArray[index].nbCorrectAnswers > 8) { color = "#40ff00"; } else if (questionsArray[index].nbCorrectAnswers > -1) {color = "red"; }
+                answer9.innerHTML = "<font color='" + color + "'><i>#{translation.answer9}:</i><br></font>" + questionsArray[index].answers[8];
+            }
+            if (questionsArray[index].answers[9] != undefined) {
+                if (questionsArray[index].nbCorrectAnswers > 9) { color = "#40ff00"; } else if (questionsArray[index].nbCorrectAnswers > -1) {color = "red"; }
+                answer10.innerHTML = "<font color='" + color + "'><i>#{translation.answer10}:</i><br></font>" + questionsArray[index].answers[9];
+            }
+            //END SETTING ANSER OPTIONS
             question_type.innerHTML = questionsArray[index].questionType;
             questionImage.src = "/users_images/" + questionsArray[index].imageName;
             if (questionImage && questionImage.style) {

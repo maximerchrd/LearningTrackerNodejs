@@ -18,9 +18,11 @@ var translation;
 var currentUser = "";
 
 //define question object
-function Question(questionID, questionText, questionType, imageName, rating, userSelected) {
+function Question(questionID, questionText, answers, nbCorrectAnswers, questionType, imageName, rating, userSelected) {
     this.questionID = questionID;
     this.questionText = questionText;
+    this.answers = answers;
+    this.nbCorrectAnswers = nbCorrectAnswers;
     this.questionType = questionType;   // 0: multiple choice; 1: short answer
     this.imageName = imageName;
     this.rating = rating;
@@ -81,16 +83,16 @@ router.get('/', function (req, res, next) {
             for (var i in rows) {
                 if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                     if (rows[i].QUESTION_TYPE == 0) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                     } else {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                     }
                     questionsArray.push(question);
                 } else {
                     if (rows[i].QUESTION_TYPE == 0) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                     } else {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                     }
                     questionsArray.push(question);
                 }
@@ -274,9 +276,9 @@ router.post('/', function (req, res) {
                         if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                             if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "My questions") {
                                 if (rows[i].QUESTION_TYPE == 0) {
-                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                                 } else {
-                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                                 }
                                 questionsArray.push(question);
                             }
@@ -284,9 +286,9 @@ router.post('/', function (req, res) {
                     } else {
                         if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "Other questions") {
                             if (rows[i].QUESTION_TYPE == 0) {
-                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                             } else {
-                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                             }
                             questionsArray.push(question);
                         }
@@ -448,6 +450,16 @@ function setTranslation() {
         save_changes: i18n.__('save changes'),
         search: i18n.__('search'),
         question: i18n.__('question'),
+        answer1: i18n.__('answer %s',1),
+        answer2: i18n.__('answer %s',2),
+        answer3: i18n.__('answer %s',3),
+        answer4: i18n.__('answer %s',4),
+        answer5: i18n.__('answer %s',5),
+        answer6: i18n.__('answer %s',6),
+        answer7: i18n.__('answer %s',7),
+        answer8: i18n.__('answer %s',8),
+        answer9: i18n.__('answer %s',9),
+        answer10: i18n.__('answer %s',10),
         question_type: i18n.__('question type'),
         picture: i18n.__('picture'),
         rating: i18n.__('rating'),
@@ -460,6 +472,41 @@ function setTranslation() {
         select_question: i18n.__('select question')
     };
     return translation
+}
+
+function setAnswers(row) {
+    var answers = [];
+    if (row.OPTION0 != " ") {
+        answers.push(row.OPTION0);
+    }
+    if (row.OPTION1 != " ") {
+        answers.push(row.OPTION1);
+    }
+    if (row.OPTION2 != " ") {
+        answers.push(row.OPTION2);
+    }
+    if (row.OPTION3 != " ") {
+        answers.push(row.OPTION3);
+    }
+    if (row.OPTION4 != " ") {
+        answers.push(row.OPTION4);
+    }
+    if (row.OPTION5 != " ") {
+        answers.push(row.OPTION5);
+    }
+    if (row.OPTION6 != " ") {
+        answers.push(row.OPTION6);
+    }
+    if (row.OPTION7 != " ") {
+        answers.push(row.OPTION7);
+    }
+    if (row.OPTION8 != " ") {
+        answers.push(row.OPTION8);
+    }
+    if (row.OPTION9 != " ") {
+        answers.push(row.OPTION9);
+    }
+    return answers;
 }
 
 module.exports = router;
