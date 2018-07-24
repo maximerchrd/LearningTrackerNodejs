@@ -37,7 +37,7 @@ router.post('/', function(req, res) {
         });
 
     //do mysql stuffs
-    var sql = "INSERT INTO multiple_choice_questions (QUESTION, IMAGE_PATH) VALUES ('" + quest +
+    var sql = "INSERT INTO question (QUESTION, IMAGE_PATH) VALUES ('" + quest +
         "', '" + imageName + "');"
     // First you need to create a connection to the db
     const con = mysql.createConnection({

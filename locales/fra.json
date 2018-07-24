@@ -1,0 +1,29 @@
+{
+	"Hello": "Salut les Gus",
+	"You have %s message": {
+		"one": "You have %s message",
+		"other": "You have %s messages"
+	},
+	"sign in": "Se connecter",
+	"sign out": "Se déconnecter",
+	"sign up": "S'inscrire",
+	"questions": "Questions",
+	"home": "Accueil",
+	"user name": "Nom d'utilisateur",
+	"password": "Mot de passe",
+	"email": "Email",
+	"confirm_password": "Confirmer le mot de passe",
+	"save changes": "Sauver mes Changements",
+	"search": "Rechercher",
+	"question": "Question",
+	"question type": "Type de Question",
+	"picture": "Image",
+	"rating": "Note",
+	"my questions": "Mes Questions",
+	"load more questions": "Charger plus de Questions",
+	"type": "Type",
+	"average rating": "Note Moyenne",
+	"your rating": "Votre Note",
+	"submit my rating": "Soumettre ma Note",
+	"select question": "Sélectionner la Question"
+}

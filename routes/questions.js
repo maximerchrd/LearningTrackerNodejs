@@ -21,7 +21,7 @@ var currentUser = "";
 function Question(questionID, questionText, questionType, imageName, rating, userSelected) {
     this.questionID = questionID;
     this.questionText = questionText;
-    this.questionType = questionType;
+    this.questionType = questionType;   // 0: multiple choice; 1: short answer
     this.imageName = imageName;
     this.rating = rating;
     this.userSelected = userSelected
@@ -76,27 +76,22 @@ router.get('/', function (req, res, next) {
             });
         }
 
-        con.query("SELECT * FROM short_answer_questions WHERE LANGUAGE = '" + global.language + "' LIMIT 500;", function (err, rows) {
+        con.query("SELECT * FROM question WHERE LANGUAGE = '" + global.language + "' LIMIT 500;", function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
                 if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
-                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                    if (rows[i].QUESTION_TYPE == 0) {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                    } else {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                    }
                     questionsArray.push(question);
                 } else {
-                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
-                    questionsArray.push(question);
-                }
-            }
-        });
-
-        con.query("SELECT * FROM multiple_choice_questions WHERE LANGUAGE = '" + global.language + "' LIMIT 500;", function (err, rows) {
-            if (err) throw err;
-            for (var i in rows) {
-                if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
-                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
-                    questionsArray.push(question);
-                } else {
-                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                    if (rows[i].QUESTION_TYPE == 0) {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                    } else {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                    }
                     questionsArray.push(question);
                 }
             }
@@ -181,13 +176,10 @@ router.post('/', function (req, res) {
                         //third insert the new rating for the question
                         var sqlSetRating = ""
                         var sqlSetRatingArgs = []
-                        if (req.body.questionType == "Short Answer") {
-                            sqlSetRating = "UPDATE short_answer_questions SET RATING = ? WHERE IDENTIFIER = ? "
-                            sqlSetRatingArgs = [newRating, req.body.questionRated]
-                        } else {
-                            sqlSetRating = "UPDATE multiple_choice_questions SET RATING = ? WHERE IDENTIFIER = ? "
-                            sqlSetRatingArgs = [newRating, req.body.questionRated]
-                        }
+
+                        sqlSetRating = "UPDATE question SET RATING = ? WHERE IDENTIFIER = ? "
+                        sqlSetRatingArgs = [newRating, req.body.questionRated]
+
 
                         con.query(sqlSetRating, sqlSetRatingArgs, function (err, result) {
                             if (err) throw err;
@@ -230,48 +222,33 @@ router.post('/', function (req, res) {
         console.log("search request");
         //reinit question array
         questionsArray = [];
-        var shrtaqQuery = "SELECT * FROM short_answer_questions ";
-        var mcqQuery = "SELECT * FROM multiple_choice_questions ";
+        var mcqQuery = "SELECT * FROM question ";
         var shrtaqArg = [];
         var mcqArg = [];
 
         console.log(req.body.subjectFilter);
         if (req.body.subjectFilter != "All subjects") {
-            shrtaqQuery += "INNER JOIN `relation_question_subject` ON `short_answer_questions`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
-            "INNER JOIN `subjects` ON `relation_question_subject`.`IDENTIFIER_SUBJECT` = `subjects`.`IDENTIFIER` " +
-            "WHERE `subjects`.`SUBJECT` = ? ";
-            shrtaqArg.push(req.body.subjectFilter);
-
-            mcqQuery += "INNER JOIN `relation_question_subject` ON `multiple_choice_questions`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
+            mcqQuery += "INNER JOIN `relation_question_subject` ON `question`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
                 "INNER JOIN `subjects` ON `relation_question_subject`.`IDENTIFIER_SUBJECT` = `subjects`.`IDENTIFIER` " +
                 "WHERE `subjects`.`SUBJECT` = ? ";
             mcqArg.push(req.body.subjectFilter)
 
             if (req.body.keyword != "") {
-                shrtaqQuery += " AND QUESTION LIKE ? AND short_answer_questions.LANGUAGE = ?";
-                shrtaqArg.push("%" + req.body.keyword + "%")
-                shrtaqArg.push(global.language);
-
-                mcqQuery += " AND QUESTION LIKE ? AND multiple_choice_questions.LANGUAGE = ?";
+                mcqQuery += " AND QUESTION LIKE ? AND question.LANGUAGE = ?";
                 mcqArg.push("%" + req.body.keyword + "%")
                 mcqArg.push(global.language);
             } else {
-                shrtaqQuery += " AND short_answer_questions.LANGUAGE = ?";
-                shrtaqArg.push(global.language);
-
-                mcqQuery += " AND multiple_choice_questions.LANGUAGE = ?";
+                mcqQuery += " AND question.LANGUAGE = ?";
                 mcqArg.push(global.language);
             }
 
-            shrtaqQuery += " LIMIT 500"
             mcqQuery += " LIMIT 500"
         } else if (req.body.subjectFilter == "All subjects" && req.body.keyword != "") {
-            shrtaqQuery += "WHERE QUESTION LIKE ? AND short_answer_questions.LANGUAGE = ?";
-            shrtaqArg.push("%" + req.body.keyword + "%");
-            shrtaqArg.push(global.language);
-
-            mcqQuery += "WHERE QUESTION LIKE ? AND multiple_choice_questions.LANGUAGE = ?";
+            mcqQuery += "WHERE QUESTION LIKE ? AND question.LANGUAGE = ?";
             mcqArg.push("%" + req.body.keyword + "%");
+            mcqArg.push(global.language);
+        } else {
+            mcqQuery += "WHERE question.LANGUAGE = ?";
             mcqArg.push(global.language);
         }
 
@@ -289,26 +266,6 @@ router.post('/', function (req, res) {
             if (err) throw err;
 
             questionsArray = [];
-            con.query(shrtaqQuery, shrtaqArg, function (err, rows) {
-                if (err) throw err;
-                for (var i in rows) {
-                    if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
-                        if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
-                            if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "My questions") {
-                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
-                                questionsArray.push(question);
-                            }
-                        }
-                    } else {
-                        if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "Other questions") {
-                            if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "Other questions") {
-                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
-                                questionsArray.push(question);
-                            }
-                        }
-                    }
-                }
-            });
 
             con.query(mcqQuery, mcqArg, function (err, rows) {
                 if (err) throw err;
@@ -316,13 +273,21 @@ router.post('/', function (req, res) {
                     if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                         if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                             if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "My questions") {
-                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                                if (rows[i].QUESTION_TYPE == 0) {
+                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                                } else {
+                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                                }
                                 questionsArray.push(question);
                             }
                         }
                     } else {
                         if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "Other questions") {
-                            var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                            if (rows[i].QUESTION_TYPE == 0) {
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                            } else {
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                            }
                             questionsArray.push(question);
                         }
                     }
@@ -466,12 +431,12 @@ router.post('/', function (req, res) {
 function setLanguage(req, res) {
     //set language
     i18n.init(req, res);
-    if (global.language == "en") {
-        i18n.setLocale('en');
-    } else if (global.language == "fr") {
-        i18n.setLocale('fr');
+    if (global.language == "eng") {
+        i18n.setLocale('eng');
+    } else if (global.language == "fra") {
+        i18n.setLocale('fra');
     } else {
-        global.language = 'en';
+        global.language = 'eng';
     }
 }
 

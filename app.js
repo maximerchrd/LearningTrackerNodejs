@@ -20,8 +20,8 @@ var userProfileRouter = require('./routes/user_profile');
 //initialize internationalization
 var i18n = require("i18n");
 i18n.configure({
-    locales:['en', 'fr'],
-    defaultLocale: 'en',
+    locales:['eng', 'fra'],
+    defaultLocale: 'eng',
     directory: __dirname + '/locales'
 });
 //var jsonToDbRouter = require('./bin/jsonToDb');

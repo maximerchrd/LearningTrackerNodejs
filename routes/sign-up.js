@@ -79,12 +79,12 @@ router.get('/', function(req, res, next) {
 
 function setLanguage(req,res) {
     i18n.init(req, res);
-    if (global.language == "en") {
-        i18n.setLocale('en');
-    } else if (global.language == "fr") {
-        i18n.setLocale('fr');
+    if (global.language == "eng") {
+        i18n.setLocale('eng');
+    } else if (global.language == "fra") {
+        i18n.setLocale('fra');
     } else {
-        global.language = "en";
+        global.language = "eng";
     }
 }
 
