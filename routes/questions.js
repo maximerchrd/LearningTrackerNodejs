@@ -52,7 +52,7 @@ router.get('/', function (req, res, next) {
         if (err) throw err;
         //reinitialize array
         mainSubjects = ["All subjects"];
-        con.query("SELECT SUBJECT FROM subjects;", function (err, rows) {
+        con.query("SELECT SUBJECT FROM subjects WHERE LANGUAGE=?;", global.language, function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
                 mainSubjects.push(rows[i].SUBJECT);
