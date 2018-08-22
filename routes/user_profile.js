@@ -83,6 +83,7 @@ router.get('/', function (req, res, next) {
         var sqlArg = [req.user];
 
         var username = "";
+        var synckey = "";
         // First you need to create a connection to the db
         const con = mysql.createConnection({
             host: 'localhost',
@@ -97,6 +98,7 @@ router.get('/', function (req, res, next) {
 
                 for (var i in rows) {
                     username = rows[i].username;
+                    synckey = rows[i].SYNC_KEY;
                 }
 
                 var signString = "";
@@ -109,7 +111,9 @@ router.get('/', function (req, res, next) {
                     signUrl = "signin";
                 }
 
-                const synckey = crypto.randomBytes(10).toString("hex");
+                if (synckey == null) {
+                    synckey = "";
+                }
                 var data = {language: global.language, user: username, synckey: synckey};
                 var translation = setTranslation();
 

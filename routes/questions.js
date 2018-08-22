@@ -349,7 +349,7 @@ router.post('/', function (req, res) {
         console.log(questions)
         for (i = 0; i < questions.length; i++) {
             questions[i].push(req.user)
-            questions[i].push(new Date().getTime())
+            //questions[i].push(new Date().getTime())
         }
 
         //parse the post request to an array for unselected questions
@@ -371,7 +371,7 @@ router.post('/', function (req, res) {
             if (err) throw err;
 
             if (questions.length > 0) {
-                var sql = "INSERT INTO relation_resource_user (IDENTIFIER_RESOURCE, RESOURCE_TYPE, IDENTIFIER_USER, MODIF_DATE) VALUES ?";
+                var sql = "INSERT INTO relation_resource_user (IDENTIFIER_RESOURCE, RESOURCE_TYPE, IDENTIFIER_USER) VALUES ?";
                 con.query(sql, [questions], function (err, result) {
                     if (err) throw err;
                     console.log("Number of records inserted: " + result.affectedRows);
