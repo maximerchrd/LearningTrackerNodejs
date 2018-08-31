@@ -342,10 +342,10 @@ block content
 
         function loadMoreQuestions() {
             var table = document.getElementById("questions_table");
-            var i = table.rows.length
+            var i = table.rows.length - 1
             var j = table.rows.length
+            var questionIndex = i
             for (; i < questionsArray.length && i < 10 + j; i++) {
-                var questionIndex = i - 1
                 var html_image = ["<img src='/users_images/mini_" + questionsArray[questionIndex].imageName + "' id='imageQuest'>"]
                 var html_rating = ["<div class='stars'><span class='star' id='" + questionIndex + "_tstar1'></span><span class='star' id='" + questionIndex + "_tstar2'></span><span class='star' id='" + questionIndex + "_tstar3'></span><span class='star' id='" + questionIndex + "_tstar4'></span><span class='star' id='" + questionIndex + "_tstar5'></span></div>"]
                 var row = table.insertRow(table.rows.length);
