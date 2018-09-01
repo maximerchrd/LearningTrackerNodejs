@@ -8,8 +8,16 @@ block content
                 each filter in questSelectedFilter
                     option(value=filter) #{filter}
         div.form-group
-            select(name='subjectFilter')
+            select(name='regions', id='regionsSelector')
+                each region in data.regions
+                    option(value=region) #{region}
+        div.form-group
+            select(name='mainSubjectFilter', id='mainSubjectsSelector')
                 each subject in mainSubjects
+                    option(value=subject) #{subject[0]}
+        div.form-group
+            select(name='subjectFilter')
+                each subject in allSubjects
                     option(value=subject) #{subject}
         div.form-group
             input#keyword.form-control(type='keyword', placeholder='key word', name='keyword')
@@ -107,9 +115,12 @@ block content
         var saveButton = document.getElementById("saveChangesButton");
         var userQuesCombo = document.getElementById("userQuestionsCombobox");
         var rateButton = document.getElementById("submitRating");
+        var regionsSelection = document.getElementById("regionsSelector");
+        var mainSubjectSelection = document.getElementById("mainSubjectsSelector");
 
         var questionsArray = !{JSON.stringify(data.questions)};
         var ratingForResource = !{JSON.stringify(data.ratingForResource)};
+        var mainSubjectsArray = !{JSON.stringify(mainSubjects)};
         var selectedQuestions = [[]];
         var unselectedQuestions = [];
         var currentQuestionIndex = 0;
@@ -374,6 +385,24 @@ block content
                     } else {
                         starDesign = 'star';
                         document.getElementById(questionIndex + tstars[k - 1]).className = starDesign;
+                    }
+                }
+            }
+        }
+
+        regionsSelection.onchange = function() {
+            if (regionsSelection.value == "All Regions") {
+                mainSubjectSelection.options.length = 0;
+                for (var k = 0; k < mainSubjectsArray.length; k++) {
+                    mainSubjectSelection.options[mainSubjectSelection.options.length] =
+                        new Option(mainSubjectsArray[k][0], mainSubjectsArray[k][0]);
+                }
+            } else {
+                mainSubjectSelection.options.length = 1;
+                for (var k = 0; k < mainSubjectsArray.length; k++) {
+                    if (mainSubjectsArray[k][1] == regionsSelection.value) {
+                        mainSubjectSelection.options[mainSubjectSelection.options.length] =
+                            new Option(mainSubjectsArray[k][0], mainSubjectsArray[k][0]);
                     }
                 }
             }

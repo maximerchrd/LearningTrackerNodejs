@@ -37,6 +37,9 @@ CREATE TABLE IF NOT EXISTS subjects (ID INT NOT NULL AUTO_INCREMENT,
     SUBJECT TEXT,
     MODIF_DATE TEXT,
     LANGUAGE VARCHAR(30),
+    PROPERTY1       char(50),
+    PROPERTY2       char(50),
+    PROPERTY3       char(50),
     PRIMARY KEY (ID));
 
 CREATE TABLE IF NOT EXISTS tests (ID INT NOT NULL AUTO_INCREMENT,
@@ -129,11 +132,17 @@ VALUES("What alternative to mice experimentation was recently improved by the EP
 "nematodes","monkeys","rats","bacterias","cats","","","","","","1","app-image_1.jpg","4.64","123456789101237","en");
 
 
-INSERT INTO subjects (SUBJECT,IDENTIFIER)
-VALUES("Astronomy","123456789101233");
+INSERT INTO subjects (SUBJECT,IDENTIFIER,LANGUAGE,PROPERTY1,PROPERTY2)
+VALUES("Sciences de la Nature","123456789101233","fra","main","Suisse (PER)");
 
-INSERT INTO subjects (SUBJECT,IDENTIFIER)
-VALUES("Biology","123456789101234");
+INSERT INTO subjects (SUBJECT,IDENTIFIER,LANGUAGE,PROPERTY1,PROPERTY2)
+VALUES("Mathématiques","123456789101235","fra","main","Suisse (PER)");
+
+INSERT INTO subjects (SUBJECT,IDENTIFIER,LANGUAGE,PROPERTY1,PROPERTY2)
+VALUES("Sciences naturelles","123456789101236","fra","main","Belgique");
+
+INSERT INTO subjects (SUBJECT,IDENTIFIER,LANGUAGE,PROPERTY1,PROPERTY2)
+VALUES("Sciences","123456789101234","eng","main","International");
 
 INSERT INTO learning_objectives (OBJECTIVE,LEVEL_COGNITIVE_ABILITY,IDENTIFIER)
 VALUES("The student is able to remember the names of the planets in the solar system and has an idea of their location","1","123456789101235");

@@ -7,7 +7,9 @@ router.use(bodyParser.urlencoded({extended: false}));
 router.use(bodyParser.json());
 
 var questSelectedFilter = ["All questions", "My questions", "Other questions"];
-var mainSubjects = ["All subjects"];
+const regions = ["All Regions", "International", "Suisse (PER)"];
+var mainSubjects = [["Main subjects", "All regions"]];
+var allSubjects = ["All subjects"];
 var questionsArray = [];
 var resourceIdsForUser = [];
 var ratingForResource = [];
@@ -51,11 +53,18 @@ router.get('/', function (req, res, next) {
     con.connect(function (err) {
         if (err) throw err;
         //reinitialize array
-        mainSubjects = ["All subjects"];
-        con.query("SELECT SUBJECT FROM subjects WHERE LANGUAGE=?;", global.language, function (err, rows) {
+        mainSubjects = [["Main subjects", "All regions"]];
+        con.query("SELECT SUBJECT, PROPERTY2 FROM subjects WHERE LANGUAGE=? AND PROPERTY1=?;", [global.language, "main"], function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
-                mainSubjects.push(rows[i].SUBJECT);
+                mainSubjects.push([rows[i].SUBJECT, rows[i].PROPERTY2]);
+            }
+        });
+        allSubjects = ["All subjects"];
+        con.query("SELECT SUBJECT FROM subjects WHERE LANGUAGE=? AND PROPERTY1!=?;", [global.language, "main"], function (err, rows) {
+            if (err) throw err;
+            for (var i in rows) {
+                allSubjects.push(rows[i].SUBJECT);
             }
         });
 
@@ -118,11 +127,11 @@ router.get('/', function (req, res, next) {
                 }
             }
             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                language: global.language};
+                language: global.language, regions: regions};
             translation = setTranslation();
             res.render('questions', {
                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
-                mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
+                mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
             });
         });
     });
@@ -208,11 +217,11 @@ router.post('/', function (req, res) {
                             }
 
                             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                                language: global.language};
+                                language: global.language, regions: regions};
                             translation = setTranslation();
                             res.render('questions', {
                                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
-                                mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
+                                mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
                             });
                         });
                     });
@@ -229,11 +238,20 @@ router.post('/', function (req, res) {
         var mcqArg = [];
 
         console.log(req.body.subjectFilter);
-        if (req.body.subjectFilter != "All subjects") {
+        if (req.body.mainSubjectFilter != "Main subjects" || req.body.subjectFilter != "All subjects") {
+            var mainSubFilter = req.body.mainSubjectFilter;
+            var subFilter = req.body.subjectFilter;
+            if (mainSubFilter == "Main subjects") {
+                mainSubFilter = "%";
+            }
+            if (subFilter == "All subjects") {
+                subFilter = "%";
+            }
             mcqQuery += "INNER JOIN `relation_question_subject` ON `question`.IDENTIFIER = `relation_question_subject`.`IDENTIFIER_QUESTION` " +
                 "INNER JOIN `subjects` ON `relation_question_subject`.`IDENTIFIER_SUBJECT` = `subjects`.`IDENTIFIER` " +
-                "WHERE `subjects`.`SUBJECT` = ? ";
-            mcqArg.push(req.body.subjectFilter)
+                "WHERE `subjects`.`SUBJECT` LIKE ? AND `subjects`.`SUBJECT` LIKE ?";
+            mcqArg.push(mainSubFilter);
+            mcqArg.push(subFilter);
 
             if (req.body.keyword != "") {
                 mcqQuery += " AND QUESTION LIKE ? AND question.LANGUAGE = ?";
@@ -245,7 +263,7 @@ router.post('/', function (req, res) {
             }
 
             mcqQuery += " LIMIT 500"
-        } else if (req.body.subjectFilter == "All subjects" && req.body.keyword != "") {
+        } else if (req.body.subjectFilter == "Main subjects" && req.body.keyword != "") {
             mcqQuery += "WHERE QUESTION LIKE ? AND question.LANGUAGE = ?";
             mcqArg.push("%" + req.body.keyword + "%");
             mcqArg.push(global.language);
@@ -326,11 +344,11 @@ router.post('/', function (req, res) {
                 }
 
                 data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                    language: global.language};
+                    language: global.language, regions: regions};
                 translation = setTranslation();
                 res.render('questions', {
                     sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
-                    mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
+                    mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
                 });
             });
         });
@@ -421,11 +439,11 @@ router.post('/', function (req, res) {
         }
 
         data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-            language: global.language};
+            language: global.language, regions: regions};
         translation = setTranslation();
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
-            mainSubjects: mainSubjects, questSelectedFilter: questSelectedFilter
+            mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
         });
     }
 });
