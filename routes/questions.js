@@ -3,11 +3,14 @@ var router = express.Router();
 const mysql = require('mysql');
 var bodyParser = require('body-parser');
 var i18n = require('i18n');
+var multer  = require('multer')
+var upload = multer({ dest: 'public/users_files/' })
 router.use(bodyParser.urlencoded({extended: false}));
 router.use(bodyParser.json());
 
 var questSelectedFilter = ["All questions", "My questions", "Other questions"];
 const regions = ["All Regions", "International", "Suisse (PER)"];
+const resourcesTypes = ["Whole Teaching Sequence", "Evaluation / Exercise", "Activity", "Other"];   //corresponding codes: 3, 4, 5, 6
 var mainSubjects = [["Main subjects", "All regions"]];
 var allSubjects = ["All subjects"];
 var questionsArray = [];
@@ -19,13 +22,20 @@ var data;
 var translation;
 var currentUser = "";
 
+const mysqlConnection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'koeko_website'
+});
+
 //define question object
 function Question(questionID, questionText, answers, nbCorrectAnswers, questionType, imageName, rating, userSelected) {
     this.questionID = questionID;
     this.questionText = questionText;
     this.answers = answers;
     this.nbCorrectAnswers = nbCorrectAnswers;
-    this.questionType = questionType;   // 0: multiple choice; 1: short answer
+    this.questionType = questionType;   // 0: multiple choice; 1: short answer, 2: test, 3: teaching sequence
     this.imageName = imageName;
     this.rating = rating;
     this.userSelected = userSelected
@@ -93,15 +103,19 @@ router.get('/', function (req, res, next) {
                 if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                     if (rows[i].QUESTION_TYPE == 0) {
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
-                    } else {
+                    } else if (rows[i].QUESTION_TYPE == 1) {
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                    } else if (rows[i].QUESTION_TYPE == 3) {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                     }
                     questionsArray.push(question);
                 } else {
                     if (rows[i].QUESTION_TYPE == 0) {
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
-                    } else {
+                    } else if (rows[i].QUESTION_TYPE == 1){
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                    } else if (rows[i].QUESTION_TYPE == 3) {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                     }
                     questionsArray.push(question);
                 }
@@ -127,7 +141,7 @@ router.get('/', function (req, res, next) {
                 }
             }
             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                language: global.language, regions: regions};
+                language: global.language, regions: regions, resourcesTypes: resourcesTypes};
             translation = setTranslation();
             res.render('questions', {
                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -137,7 +151,7 @@ router.get('/', function (req, res, next) {
     });
 });
 
-router.post('/', function (req, res) {
+router.post('/', upload.any(), function (req, res) {
     console.log(req.body)
 
     setLanguage(req, res);
@@ -295,8 +309,10 @@ router.post('/', function (req, res) {
                             if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "My questions") {
                                 if (rows[i].QUESTION_TYPE == 0) {
                                     var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
-                                } else {
+                                } else if (rows[i].QUESTION_TYPE == 1) {
                                     var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                                } else if (rows[i].QUESTION_TYPE == 3) {
+                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                                 }
                                 questionsArray.push(question);
                             }
@@ -305,8 +321,10 @@ router.post('/', function (req, res) {
                         if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "Other questions") {
                             if (rows[i].QUESTION_TYPE == 0) {
                                 var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
-                            } else {
+                            } else if (rows[i].QUESTION_TYPE == 1) {
                                 var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                            } else if (rows[i].QUESTION_TYPE == 3) {
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                             }
                             questionsArray.push(question);
                         }
@@ -352,7 +370,93 @@ router.post('/', function (req, res) {
                 });
             });
         });
-    } else {
+    } else if (req.files) {
+        //insert resource into db
+
+        //code the type of resource
+        var typeCode = 3;
+        if (req.body.resourceType == "Evaluation / Exercise") {
+            typeCode = 4;
+        } else if (req.body.resourceType == "Evaluation / Exercise") {
+            typeCode = 5;
+        } else if (req.body.resourceType == "Other") {
+            typeCode = 6;
+        }
+
+        //format the date
+        var currentdate = new Date();
+        var datetime = currentdate.getUTCFullYear() + "-"
+            + (currentdate.getUTCMonth()+1)  + "-"
+            + currentdate.getUTCDate() + " "
+            + currentdate.getUTCHours() + ":"
+            + currentdate.getUTCMinutes() + ":"
+            + currentdate.getUTCSeconds() + ":"
+            + currentdate.getUTCMilliseconds();
+        const uid = new Date().getTime();
+        var filename1 = "none";
+        var filename2 = "none";
+        var filename3 = "none";
+        var filename4 = "none";
+        if (req.files[0]) {
+            filename1 = req.files[0].filename + "***" + req.body.filename1;
+        }
+        if (req.files[1]) {
+            filename2 = req.files[1].filename + "***" + req.body.filename2;
+        }
+        if (req.files[2]) {
+            filename3 = req.files[2].filename + "***" + req.body.filename3;
+        }
+        if (req.files[3]) {
+            filename4 = req.files[3].filename + "***" + req.body.filename4;
+        }
+        var imagename = "none";
+        if (req.files[4]) {
+            imagename = req.files[4].fileName;
+        }
+
+        //deal with other possibly empty fields
+        var resourceTitle = "none";
+        if (req.body.resourceTitle) {
+            resourceTitle = req.body.resourceTitle;
+        }
+        var resourceDescription = none;
+        if (req.body.resourceDescription) {
+            resourceDescription = req.body.resourceDescription;
+        }
+
+        var resource = [uid, typeCode, resourceTitle, resourceDescription,
+            filename1, filename2, filename3, filename4, imagename, datetime, global.language];
+        var sql = "INSERT INTO question (IDENTIFIER, QUESTION_TYPE, QUESTION, OPTION0, OPTION1, OPTION2, OPTION3, OPTION4," +
+            "IMAGE_PATH, MODIF_DATE, LANGUAGE) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        mysqlConnection.query(sql, resource, function (err, result) {
+            if (err) throw err;
+            console.log("Number of records inserted: " + result.affectedRows);
+        });
+
+        //insert subject relation
+        var args = [uid, req.body.mainSubject];
+        var sql = "INSERT INTO relation_question_subject (IDENTIFIER_QUESTION, IDENTIFIER_SUBJECT) " +
+            "SELECT ?,IDENTIFIER FROM subjects WHERE SUBJECT = ?";
+        mysqlConnection.query(sql, args, function (err, result) {
+            if (err) throw err;
+            console.log("Number of records inserted: " + result.affectedRows);
+        });
+
+        //sets empty string in case user is undefined
+        if (req.user) {
+            currentUser = req.user
+        } else {
+            currentUser = ""
+        }
+
+        data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
+            language: global.language, regions: regions};
+        translation = setTranslation();
+        res.render('questions', {
+            sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
+            mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
+        });
+    } else if (req.body.selectedQuestions){
         //handle save changes request
         console.log("posted Save my Changes")
 

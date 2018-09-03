@@ -1,0 +1,32 @@
+.sequence-modal(style="overflow:scroll;")
+    .modal-content
+        span(class="close-button", onclick="toggleSequenceModalClose()") &times;
+        div.row(style='margin-top: 30px;')
+            div.title-label Title:
+            div.title-text some title
+        div.row
+            div.description-label Description:
+            div.description-text some description
+        img(src="/users_images/", id="questionImage")
+        a(href='/users_files/L66PEYJT2D.txt' download="sequence") Download 2
+        div.row
+            div.star-label #{translation.average_rating}:
+            div(class='stars')
+                span(class="star" id="star1")
+                span(class="star" id="star2")
+                span(class="star" id="star3")
+                span(class="star" id="star4")
+                span(class="star" id="star5")
+        div.row
+            div.star-label #{translation.your_rating}:
+            div(class='stars')
+                span(class="star" id="ustar1" onclick='rate1star()')
+                span(class="star" id="ustar2" onclick='rate2stars()')
+                span(class="star" id="ustar3" onclick='rate3stars()')
+                span(class="star" id="ustar4" onclick='rate4stars()')
+                span(class="star" id="ustar5" onclick='rate5stars()')
+        form(method='POST' action='/questions' class="form-rating")
+            input(type='text' hidden=true name='userRating' value='' id='userRating')
+            input(type='text' hidden=true name='questionRated' value='' id='questionRated')
+            input(type='text' hidden=true name='questionType' value='' id='questionType')
+            button(type='submit', id='submitRating' class='small-button') #{translation.submit_my_rating}

@@ -1,0 +1,80 @@
+.create-sequence-modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(1.1);
+    transition: visibility 0s linear 0.25s, opacity 0.25s 0s, transform 0.25s;
+}
+.modal-content {
+    position: absolute;
+    top: 4rem;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    background-color: white;
+    padding: 1rem 1.5rem;
+    width: 28rem;
+    border-radius: 0.5rem;
+}
+.close-button {
+    float: right;
+    width: 1.5rem;
+    line-height: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    background-color: lightgray;
+}
+.close-button:hover {
+    background-color: darkgray;
+}
+.show-modal {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1.0);
+    transition: visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s;
+}
+.title-label {
+    float: left;
+    width: 25%;
+    margin-top: 10px;
+    font-style: italic;
+}
+.title-text {
+    float: left;
+    width: 75%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.description-text {
+    float: left;
+    width: 75%;
+    margin-top: 10px;
+    display: inline-block;
+}
+.answer-option {
+    float: left;
+    width: 45%;
+    margin-top: 10px;
+    margin-right: 1rem;
+}
+.star-label {
+    float: left;
+    width: 30%;
+    margin-top: 10px;
+    font-style: italic;
+}
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+.form-rating {
+    padding: 15px 0;
+    text-align: center;
+}

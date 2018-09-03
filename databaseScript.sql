@@ -164,24 +164,29 @@ VALUES("123456789101230","123456789101235");
 
 INSERT INTO users(IDENTIFIER, username,email,password) VALUES ("AJDkdneDqwifhdn", "Ali Baba", "alibaba@mail.com","$2a$12$8.qr34yWBP9SNWF5dl4ji.SRpbrxstLQMUsP1C8az1x7b6N00t3/q");
 
+INSERT INTO question (QUESTION_TYPE, QUESTION,OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS,IMAGE_PATH,RATING,IDENTIFIER,LANGUAGE)
+        VALUES(3,"Sequence on electricity", "nematodes","monkeys","rats","bacterias","cats","","","","","","1","app-image_1.jpg",3,"10000","eng");
+
+INSERT INTO question (QUESTION_TYPE, QUESTION,OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS,IMAGE_PATH,RATING,IDENTIFIER,LANGUAGE)
+        VALUES(0,"Question on electricity", "nematodes","monkeys","rats","bacterias","cats","","","","","","1","app-image_1.jpg",2,"10001","eng");
 
 delimiter //
 
-CREATE procedure koeko_website.repeat_loop_example()
-wholeblock:BEGIN
-  DECLARE x INT;
-  DECLARE y INT;
-  DECLARE str VARCHAR(255);
-  SET x = 20000;
-  SET str = '';
-
-  REPEAT
-    SET x = x - 1;
-    SET y = x % 5;
-    INSERT INTO question (QUESTION,OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS,IMAGE_PATH,RATING,IDENTIFIER,LANGUAGE)
-        VALUES(x,
-        "nematodes","monkeys","rats","bacterias","cats","","","","","","1","app-image_1.jpg",y,x,"fr");
-    UNTIL x <= 0
-  END REPEAT;
-END//
-call repeat_loop_example();
+-- CREATE procedure koeko_website.repeat_loop_example()
+-- wholeblock:BEGIN
+--  DECLARE x INT;
+--  DECLARE y INT;
+--  DECLARE str VARCHAR(255);
+--  SET x = 20000;
+--  SET str = '';
+--
+--  REPEAT
+--    SET x = x - 1;
+--    SET y = x % 5;
+--    INSERT INTO question (QUESTION,OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS,IMAGE_PATH,RATING,IDENTIFIER,LANGUAGE)
+--        VALUES(x,
+--        "nematodes","monkeys","rats","bacterias","cats","","","","","","1","app-image_1.jpg",y,x,"fr");
+--    UNTIL x <= 0
+--  END REPEAT;
+-- END//
+-- call repeat_loop_example();
