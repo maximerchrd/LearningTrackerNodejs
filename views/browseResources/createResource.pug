@@ -1,23 +1,33 @@
 .create-sequence-modal(style="overflow:scroll;")
     .modal-content
         span(class="close-button", onclick="toggleCreateResource()") &times;
-        form(method='POST' action='/questions' class="form-rating" enctype='multipart/form-data' id='createresourceform')
-            select(name='resourceType')
-                each resourceType in data.resourcesTypes
-                    option(value=resourceType) #{resourceType}
-            input(type='text' name='resourceTitle' value='' id='resourceTitle' placeholder='Title')
-            textarea(name='resourceDescription' form='createresourceform')
-            select(name='mainSubject', id='mainSubject')
-                each subject in mainSubjects
-                    option(value=subject[0]) #{subject[0]}
-            input(type='text' name='filename1' value='' placeholder='Name of the file')
-            input(type='file' name='filetoupload1' id='filetoupload1')
-            input(type='text' name='filename2' value='' placeholder='Name of the file')
-            input(type='file' name='filetoupload2' id='filetoupload2')
-            input(type='text' name='filename3' value='' placeholder='Name of the file')
-            input(type='file' name='filetoupload3' id='filetoupload3')
-            input(type='text' name='filename4' value='' placeholder='Name of the file')
-            input(type='file' name='filetoupload4' id='filetoupload4')
-            label(for='imagefile') Image File
-                input(type='file' name='imagefile' id='imagefile')
-            input(type='submit' id='createResource' class='small-button' value='Save Resource')
+        form(method='POST' action='/questions' class="form-resource" enctype='multipart/form-data' id='createresourceform')
+            ul
+                li
+                    input(type='text' name='resourceTitle' value='' id='resourceTitle' placeholder='Title' class='form-resource-textfield')
+                    select(name='resourceType')
+                        each resourceType in data.resourcesTypes
+                            option(value=resourceType) #{resourceType}
+                li
+                    textarea(name='resourceDescription' placeholder='Description' id='resourceDescription')
+                li
+                    select(name='mainSubject', id='mainSubject')
+                        each subject in mainSubjects
+                            option(value=subject[0]) #{subject[0]}
+                li
+                    input(type='text' name='filename1' value='' placeholder='Name of the file' class='form-resource-textfield')
+                    input(type='file' name='filetoupload1' id='filetoupload1')
+                li
+                    input(type='text' name='filename2' value='' placeholder='Name of the file' class='form-resource-textfield')
+                    input(type='file' name='filetoupload2' id='filetoupload2')
+                li
+                    input(type='text' name='filename3' value='' placeholder='Name of the file' class='form-resource-textfield')
+                    input(type='file' name='filetoupload3' id='filetoupload3')
+                li
+                    input(type='text' name='filename4' value='' placeholder='Name of the file' class='form-resource-textfield')
+                    input(type='file' name='filetoupload4' id='filetoupload4')
+                li
+                    label(for='imagefile' class='form-resource-textfield') Image File
+                    input(type='file' name='imagefile' id='imagefile')
+                li
+                    input(type='submit' id='createResource' class='small-button' value='Save Resource')

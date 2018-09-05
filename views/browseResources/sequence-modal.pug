@@ -1,14 +1,42 @@
 .sequence-modal(style="overflow:scroll;")
     .modal-content
         span(class="close-button", onclick="toggleSequenceModalClose()") &times;
-        div.row(style='margin-top: 30px;')
-            div.title-label Title:
-            div.title-text some title
-        div.row
-            div.description-label Description:
-            div.description-text some description
-        img(src="/users_images/", id="questionImage")
-        a(href='/users_files/L66PEYJT2D.txt' download="sequence") Download 2
+        form(method='POST' action='/questions' class="form-resource" enctype='multipart/form-data' id='createresourceform')
+            ul(class='ul-resource')
+                li
+                    input(type='text' name='resourceTitle' value='' id='resourceTitle' placeholder='Title' class='form-resource-textfield')
+                    select(name='resourceType' id='resourceType')
+                        each resourceType in data.resourcesTypes
+                            option(value=resourceType) #{resourceType}
+                li
+                    textarea(name='resourceDescription' id='resourceDescription' form='createresourceform')
+                li
+                    select(name='mainSubject', id='mainSubject')
+                        each subject in mainSubjects
+                            option(value=subject[0]) #{subject[0]}
+                li
+                    input(type='text' name='filename1' id='filename1' value='' placeholder='Name of the file' class='form-resource-textfield' style='visibility: hidden;')
+                    input(type='file' name='filetoupload1' id='filetoupload1' style='visibility: hidden;')
+                    a(download="sequence" class='download-link' id='download1') Download 1
+                li
+                    input(type='text' name='filename2' id='filename2' value='' placeholder='Name of the file' class='form-resource-textfield' style='visibility: hidden;')
+                    input(type='file' name='filetoupload2' id='filetoupload2' style='visibility: hidden;')
+                    a(download="sequence" class='download-link' id='download2') Download 2
+                li
+                    input(type='text' name='filename3' id='filename3' value='' placeholder='Name of the file' class='form-resource-textfield' style='visibility: hidden;')
+                    input(type='file' name='filetoupload3' id='filetoupload3' style='visibility: hidden;')
+                    a(download="sequence" class='download-link' id='download3') Download 3
+                li
+                    input(type='text' name='filename4' id='filename4' value='' placeholder='Name of the file' class='form-resource-textfield' style='visibility: hidden;')
+                    input(type='file' name='filetoupload4' id='filetoupload4' style='visibility: hidden;')
+                    a(download="sequence" class='download-link' id='download4') Download 4
+                li
+                    label(for='imagefile' class='form-resource-textfield') Image File
+                    input(type='file' name='imagefile' id='imagefile')
+                li
+                    input(type='submit' id='createResource' class='small-button' value='Save Resource' style='visibility: hidden;')
+        button(onclick='startEditResource()' class='small-button' id="edit-button") Edit
+        hr(color='gray')
         div.row
             div.star-label #{translation.average_rating}:
             div(class='stars')

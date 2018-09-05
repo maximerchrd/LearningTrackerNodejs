@@ -2,6 +2,7 @@ extends layout
 
 block content
     include partials/header.pug
+    script(src='javascripts/sequence-modal.js')
     form(method='POST' action='/questions' class="form-inline")
         div.form-group
             select(name='selectionFilter', id='userQuestionsCombobox')
@@ -14,7 +15,7 @@ block content
         div.form-group
             select(name='mainSubjectFilter', id='mainSubjectsSelector')
                 each subject in mainSubjects
-                    option(value=subject) #{subject[0]}
+                    option(value=subject[0]) #{subject[0]}
         div.form-group
             select(name='subjectFilter')
                 each subject in allSubjects
@@ -169,6 +170,7 @@ block content
             }
             currentQuestionIndex = index;
             if (questionsArray[index].questionType == "Teaching Unit") {
+                setModalValues(questionsArray[index]);
                 sequenceModal.classList.toggle("show-modal");
             } else {
                 question_text.innerHTML = questionsArray[index].questionText;

@@ -3,7 +3,8 @@ var router = express.Router();
 const mysql = require('mysql');
 var bodyParser = require('body-parser');
 var i18n = require('i18n');
-var multer  = require('multer')
+var multer  = require('multer');
+var fs = require('fs');
 var upload = multer({ dest: 'public/users_files/' })
 router.use(bodyParser.urlencoded({extended: false}));
 router.use(bodyParser.json());
@@ -38,7 +39,8 @@ function Question(questionID, questionText, answers, nbCorrectAnswers, questionT
     this.questionType = questionType;   // 0: multiple choice; 1: short answer, 2: test, 3: teaching sequence
     this.imageName = imageName;
     this.rating = rating;
-    this.userSelected = userSelected
+    this.userSelected = userSelected;
+    this.mainSubject = "";
 }
 
 
@@ -97,7 +99,12 @@ router.get('/', function (req, res, next) {
             });
         }
 
-        con.query("SELECT * FROM question WHERE LANGUAGE = '" + global.language + "' LIMIT 500;", function (err, rows) {
+        var sqlQuery = "SELECT t1.*,t3.SUBJECT FROM question t1 " +
+            "LEFT JOIN (SELECT DISTINCT IDENTIFIER_QUESTION, IDENTIFIER_SUBJECT FROM relation_question_subject WHERE ID IN (SELECT MAX(ID) FROM relation_question_subject GROUP BY IDENTIFIER_QUESTION)) t2" +
+            " ON t1.IDENTIFIER = t2.IDENTIFIER_QUESTION " +
+            " LEFT JOIN subjects t3 ON t2.IDENTIFIER_SUBJECT = t3.IDENTIFIER " +
+             "WHERE t1.LANGUAGE = '" + global.language + "' LIMIT 500;";
+        con.query(sqlQuery, function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
                 if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
@@ -107,6 +114,7 @@ router.get('/', function (req, res, next) {
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                     } else if (rows[i].QUESTION_TYPE == 3) {
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        question.mainSubject = rows[i].SUBJECT;
                     }
                     questionsArray.push(question);
                 } else {
@@ -116,6 +124,7 @@ router.get('/', function (req, res, next) {
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                     } else if (rows[i].QUESTION_TYPE == 3) {
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        question.mainSubject = rows[i].SUBJECT;
                     }
                     questionsArray.push(question);
                 }
@@ -231,7 +240,7 @@ router.post('/', upload.any(), function (req, res) {
                             }
 
                             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                                language: global.language, regions: regions};
+                                language: global.language, regions: regions, resourcesTypes: resourcesTypes};
                             translation = setTranslation();
                             res.render('questions', {
                                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -252,7 +261,9 @@ router.post('/', upload.any(), function (req, res) {
         var mcqArg = [];
 
         console.log(req.body.subjectFilter);
-        if (req.body.mainSubjectFilter != "Main subjects" || req.body.subjectFilter != "All subjects") {
+        var mainSubFilter = req.body.mainSubjectFilter;
+        if (mainSubFilter != "Main subjects" || req.body.subjectFilter != "All subjects") {
+            mcqQuery = "SELECT question.*,subjects.SUBJECT FROM question ";
             var mainSubFilter = req.body.mainSubjectFilter;
             var subFilter = req.body.subjectFilter;
             if (mainSubFilter == "Main subjects") {
@@ -278,6 +289,7 @@ router.post('/', upload.any(), function (req, res) {
 
             mcqQuery += " LIMIT 500"
         } else if (req.body.subjectFilter == "Main subjects" && req.body.keyword != "") {
+            mcqQuery = "SELECT question.*,subjects.SUBJECT FROM question ";
             mcqQuery += "WHERE QUESTION LIKE ? AND question.LANGUAGE = ?";
             mcqArg.push("%" + req.body.keyword + "%");
             mcqArg.push(global.language);
@@ -313,6 +325,7 @@ router.post('/', upload.any(), function (req, res) {
                                     var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                                 } else if (rows[i].QUESTION_TYPE == 3) {
                                     var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                                    question.mainSubject = rows[i].SUBJECT;
                                 }
                                 questionsArray.push(question);
                             }
@@ -325,6 +338,7 @@ router.post('/', upload.any(), function (req, res) {
                                 var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                             } else if (rows[i].QUESTION_TYPE == 3) {
                                 var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                                question.mainSubject = rows[i].SUBJECT;
                             }
                             questionsArray.push(question);
                         }
@@ -362,7 +376,7 @@ router.post('/', upload.any(), function (req, res) {
                 }
 
                 data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                    language: global.language, regions: regions};
+                    language: global.language, regions: regions, resourcesTypes: resourcesTypes};
                 translation = setTranslation();
                 res.render('questions', {
                     sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -377,7 +391,7 @@ router.post('/', upload.any(), function (req, res) {
         var typeCode = 3;
         if (req.body.resourceType == "Evaluation / Exercise") {
             typeCode = 4;
-        } else if (req.body.resourceType == "Evaluation / Exercise") {
+        } else if (req.body.resourceType == "Activity") {
             typeCode = 5;
         } else if (req.body.resourceType == "Other") {
             typeCode = 6;
@@ -397,29 +411,20 @@ router.post('/', upload.any(), function (req, res) {
         var filename2 = "none";
         var filename3 = "none";
         var filename4 = "none";
-        if (req.files[0]) {
-            filename1 = req.files[0].filename + "***" + req.body.filename1;
-        }
-        if (req.files[1]) {
-            filename2 = req.files[1].filename + "***" + req.body.filename2;
-        }
-        if (req.files[2]) {
-            filename3 = req.files[2].filename + "***" + req.body.filename3;
-        }
-        if (req.files[3]) {
-            filename4 = req.files[3].filename + "***" + req.body.filename4;
-        }
         var imagename = "none";
-        if (req.files[4]) {
-            imagename = req.files[4].fileName;
-        }
+
+        fileTreatment(req.files[0], filename1, req);
+        fileTreatment(req.files[1], filename2, req);
+        fileTreatment(req.files[2], filename3, req);
+        fileTreatment(req.files[3], filename4, req);
+        fileTreatment(req.files[4], imagename, req);
 
         //deal with other possibly empty fields
         var resourceTitle = "none";
         if (req.body.resourceTitle) {
             resourceTitle = req.body.resourceTitle;
         }
-        var resourceDescription = none;
+        var resourceDescription = "";
         if (req.body.resourceDescription) {
             resourceDescription = req.body.resourceDescription;
         }
@@ -450,7 +455,7 @@ router.post('/', upload.any(), function (req, res) {
         }
 
         data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-            language: global.language, regions: regions};
+            language: global.language, regions: regions, resourcesTypes: resourcesTypes};
         translation = setTranslation();
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -543,7 +548,7 @@ router.post('/', upload.any(), function (req, res) {
         }
 
         data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-            language: global.language, regions: regions};
+            language: global.language, regions: regions, resourcesTypes: resourcesTypes};
         translation = setTranslation();
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -551,6 +556,25 @@ router.post('/', upload.any(), function (req, res) {
         });
     }
 });
+
+function fileTreatment(file, filename, req) {
+    if (file) {
+        if (file.fieldname == "filetoupload1") {
+            filename = file.filename + "***" + req.body.filename1;
+        } else if (file.fieldname == "filetoupload1") {
+            filename = file.filename + "***" + req.body.filename2;
+        } else if (file.fieldname == "filetoupload1") {
+            filename = file.filename + "***" + req.body.filename3;
+        } else if (file.fieldname == "filetoupload1") {
+            filename = file.filename + "***" + req.body.filename4;
+        } else if (file.fieldname == "imagefile") {
+            filename = file.filename;
+            fs.rename("public/users_files/" + filename, "public/users_images/" + filename, function (err) {
+                if (err) throw err;
+            });
+        }
+    }
+}
 
 function setLanguage(req, res) {
     //set language

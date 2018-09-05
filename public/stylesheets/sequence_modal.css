@@ -78,3 +78,63 @@
     padding: 15px 0;
     text-align: center;
 }
+
+.form-resource{
+    max-width: 450px;
+    background: #FFFFFF;
+    padding: 30px;
+    margin-top: 50px;
+    margin-right: auto;
+    margin-left: auto;
+}
+.form-resource ul{
+    padding:0;
+    margin:0;
+    list-style:none;
+    background: #FFFFFF;
+}
+.form-resource ul li{
+    display: block;
+    margin-bottom: 0px;
+    min-height: 35px;
+}
+.form-resource ul li  .field-style{
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    padding: 8px;
+    outline: none;
+    border: 1px solid #B0CFE0;
+    -webkit-transition: all 0.30s ease-in-out;
+    -moz-transition: all 0.30s ease-in-out;
+    -ms-transition: all 0.30s ease-in-out;
+    -o-transition: all 0.30s ease-in-out;
+
+}.form-resource ul li  .field-style:focus{
+     box-shadow: 0 0 5px #B0CFE0;
+     border:1px solid #B0CFE0;
+ }
+.form-resource ul li .field-split{
+    width: 49%;
+}
+.form-resource ul li .field-full{
+    width: 100%;
+}
+.form-resource ul li input.align-left{
+    float:left;
+}
+.form-resource ul li input.align-right{
+    float:right;
+}
+.form-resource ul li textarea{
+    width: 95%;
+    height: 100px;
+}
+.form-resource-textfield {
+    margin-right: 5%;
+}
+.download-link {
+    color: white;
+    background-color: #23ffbc;
+    margin-bottom: 2%;
+}
