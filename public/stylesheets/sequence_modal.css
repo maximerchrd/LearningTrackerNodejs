@@ -133,6 +133,15 @@
 .form-resource-textfield {
     margin-right: 5%;
 }
+.form-resource-textfield:disabled {
+    color: black;
+}
+.resource-select:disabled {
+    color: black;
+}
+textarea:disabled {
+    color: black;
+}
 .download-link {
     color: white;
     background-color: #23ffbc;

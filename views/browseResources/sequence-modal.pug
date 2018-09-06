@@ -4,14 +4,14 @@
         form(method='POST' action='/questions' class="form-resource" enctype='multipart/form-data' id='createresourceform')
             ul(class='ul-resource')
                 li
-                    input(type='text' name='resourceTitle' value='' id='resourceTitle' placeholder='Title' class='form-resource-textfield')
-                    select(name='resourceType' id='resourceType')
+                    input(type='text' name='resourceTitle' value='' id='resourceTitle' placeholder='Title' class='form-resource-textfield' disabled=true)
+                    select(name='resourceType' id='resourceType' disabled=true class='resource-select')
                         each resourceType in data.resourcesTypes
                             option(value=resourceType) #{resourceType}
                 li
-                    textarea(name='resourceDescription' id='resourceDescription' form='createresourceform')
+                    textarea(name='resourceDescription' id='resourceDescription' form='createresourceform' disabled=true)
                 li
-                    select(name='mainSubject', id='mainSubject')
+                    select(name='mainSubject', id='mainSubject' disabled=true class='resource-select')
                         each subject in mainSubjects
                             option(value=subject[0]) #{subject[0]}
                 li
@@ -31,11 +31,11 @@
                     input(type='file' name='filetoupload4' id='filetoupload4' style='visibility: hidden;')
                     a(download="sequence" class='download-link' id='download4') Download 4
                 li
-                    label(for='imagefile' class='form-resource-textfield') Image File
-                    input(type='file' name='imagefile' id='imagefile')
+                    label(for='imagefile' class='form-resource-textfield' style='visibility: hidden;' id='imageFileLabel') Image File
+                    input(type='file' name='imagefile' id='imagefile' style='visibility: hidden;')
                 li
                     input(type='submit' id='createResource' class='small-button' value='Save Resource' style='visibility: hidden;')
-        button(onclick='startEditResource()' class='small-button' id="edit-button") Edit
+        button(onclick='startEditResource()' class='small-button' id="edit-button" style='visibility: hidden;') Edit
         hr(color='gray')
         div.row
             div.star-label #{translation.average_rating}:

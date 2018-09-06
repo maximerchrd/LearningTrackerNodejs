@@ -41,6 +41,7 @@ function Question(questionID, questionText, answers, nbCorrectAnswers, questionT
     this.rating = rating;
     this.userSelected = userSelected;
     this.mainSubject = "";
+    this.editAvailable = false;
 }
 
 
@@ -116,6 +117,9 @@ router.get('/', function (req, res, next) {
                         var questionTypeString = intToResourceType(rows[i].QUESTION_TYPE);
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                         question.mainSubject = rows[i].SUBJECT;
+                        if (req.user == rows[i].OWNER_IDENTIFIER) {
+                            question.editAvailable = true;
+                        }
                     }
                     questionsArray.push(question);
                 } else {
@@ -127,6 +131,9 @@ router.get('/', function (req, res, next) {
                         var questionTypeString = intToResourceType(rows[i].QUESTION_TYPE);
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                         question.mainSubject = rows[i].SUBJECT;
+                        if (req.user == rows[i].OWNER_IDENTIFIER) {
+                            question.editAvailable = true;
+                        }
                     }
                     questionsArray.push(question);
                 }

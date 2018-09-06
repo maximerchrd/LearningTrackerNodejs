@@ -61,6 +61,11 @@ function setModalValues(question, userRating) {
     //set the user rating
     var ustars = ['rustar1', 'rustar2', 'rustar3', 'rustar4', 'rustar5'];
     setRating(ustars, userRating);
+
+    //make resource editable if user = resource owner
+    if (question.editAvailable) {
+        document.getElementById("edit-button").style.visibility = "visible";
+    }
 }
 
 function rateResource1Stars() {
@@ -93,5 +98,12 @@ function startEditResource() {
     document.getElementById("download3").style.visibility = "hidden";
     document.getElementById("download4").style.visibility = "hidden";
     document.getElementById("edit-button").style.visibility = "hidden";
+    document.getElementById("imageFileLabel").style.visibility = "visible";
+    document.getElementById("imagefile").style.visibility = "visible";
     document.getElementById("createResource").style.visibility = "visible";
+
+    document.getElementById("resourceTitle").disabled = false;
+    document.getElementById("resourceType").disabled = false;
+    document.getElementById("resourceDescription").disabled = false;
+    document.getElementById("mainSubject").disabled = false;
 }
