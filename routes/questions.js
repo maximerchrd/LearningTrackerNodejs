@@ -112,8 +112,9 @@ router.get('/', function (req, res, next) {
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                     } else if (rows[i].QUESTION_TYPE == 1) {
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
-                    } else if (rows[i].QUESTION_TYPE == 3) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                    } else {
+                        var questionTypeString = intToResourceType(rows[i].QUESTION_TYPE);
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                         question.mainSubject = rows[i].SUBJECT;
                     }
                     questionsArray.push(question);
@@ -122,8 +123,9 @@ router.get('/', function (req, res, next) {
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                     } else if (rows[i].QUESTION_TYPE == 1){
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
-                    } else if (rows[i].QUESTION_TYPE == 3) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                    } else {
+                        var questionTypeString = intToResourceType(rows[i].QUESTION_TYPE);
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                         question.mainSubject = rows[i].SUBJECT;
                     }
                     questionsArray.push(question);
@@ -142,6 +144,7 @@ router.get('/', function (req, res, next) {
             }
 
             //fill array containing the rating for each question using the dictionary as source
+            ratingForResource = [];
             for (var i in questionsArray) {
                 if (questionsArray[i].questionID in ratingForResourceDictonary) {
                     ratingForResource.push(ratingForResourceDictonary[questionsArray[i].questionID])
@@ -367,6 +370,7 @@ router.post('/', upload.any(), function (req, res) {
                 }
 
                 //fill array containing the rating for each question using the dictionary as source
+                ratingForResource = [];
                 for (var i in questionsArray) {
                     if (questionsArray[i].questionID in ratingForResourceDictonary) {
                         ratingForResource.push(ratingForResourceDictonary[questionsArray[i].questionID])
@@ -429,10 +433,15 @@ router.post('/', upload.any(), function (req, res) {
             resourceDescription = req.body.resourceDescription;
         }
 
+        var user = "";
+        if (req.user) {
+            user = req.user;
+        }
+
         var resource = [uid, typeCode, resourceTitle, resourceDescription,
-            filename1, filename2, filename3, filename4, imagename, datetime, global.language];
+            filename1, filename2, filename3, filename4, imagename, datetime, global.language, user];
         var sql = "INSERT INTO question (IDENTIFIER, QUESTION_TYPE, QUESTION, OPTION0, OPTION1, OPTION2, OPTION3, OPTION4," +
-            "IMAGE_PATH, MODIF_DATE, LANGUAGE) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+            "IMAGE_PATH, MODIF_DATE, LANGUAGE, OWNER_IDENTIFIER) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
         mysqlConnection.query(sql, resource, function (err, result) {
             if (err) throw err;
             console.log("Number of records inserted: " + result.affectedRows);
@@ -573,6 +582,18 @@ function fileTreatment(file, filename, req) {
                 if (err) throw err;
             });
         }
+    }
+}
+
+function intToResourceType(typeCode) {
+    if (typeCode == 3) {
+        return "Whole Teaching Sequence";
+    } else if (typeCode == 4) {
+        return "Evaluation / Exercise";
+    } else if (typeCode == 5) {
+        return "Activity";
+    } else {
+        return "Other";
     }
 }
 

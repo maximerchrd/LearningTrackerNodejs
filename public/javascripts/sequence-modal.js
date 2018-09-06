@@ -1,4 +1,5 @@
-function setModalValues(question) {
+importScripts('javascripts/star-rating.js');
+function setModalValues(question, userRating) {
     var resourceTitle = document.getElementById("resourceTitle");
     var resourceType = document.getElementById("resourceType");
     var resourceDescription = document.getElementById("resourceDescription");
@@ -52,6 +53,30 @@ function setModalValues(question) {
         download4.download = question.answers[4].split("***")[1];
         download4.href = "users_files/" + question.answers[4].split("***")[0];
     }
+
+    //set the average rating
+    var stars = ['rstar1', 'rstar2', 'rstar3', 'rstar4', 'rstar5'];
+    setRating(stars, question.rating);
+
+    //set the user rating
+    var ustars = ['rustar1', 'rustar2', 'rustar3', 'rustar4', 'rustar5'];
+    setRating(ustars, userRating);
+}
+
+function rateResource1Stars() {
+    rateResourceNStars(1, questionsArray[currentQuestionIndex]);
+}
+function rateResource2Stars() {
+    rateResourceNStars(2, questionsArray[currentQuestionIndex]);
+}
+function rateResource3Stars() {
+    rateResourceNStars(3, questionsArray[currentQuestionIndex]);
+}
+function rateResource4Stars() {
+    rateResourceNStars(4, questionsArray[currentQuestionIndex]);
+}
+function rateResource5Stars() {
+    rateResourceNStars(5, questionsArray[currentQuestionIndex]);
 }
 
 function startEditResource() {

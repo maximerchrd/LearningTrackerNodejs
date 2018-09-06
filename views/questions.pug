@@ -2,6 +2,7 @@ extends layout
 
 block content
     include partials/header.pug
+    script(src='javascripts/star-rating.js')
     script(src='javascripts/sequence-modal.js')
     form(method='POST' action='/questions' class="form-inline")
         div.form-group
@@ -24,13 +25,12 @@ block content
             input#keyword.form-control(type='keyword', placeholder='key word', name='keyword')
         div.form-group
             button.btn.btn-primary(type='submit' class='small-button') #{translation.search}
-
-    form(method='POST' action='/questions' class="form_sign")
-        input(type='text' hidden=true name='selectedQuestions' value='' id='selectedQuestionsField')
-        input(type='text' hidden=true name='unselectedQuestions' value='' id='unselectedQuestionsField')
-        button(type='submit', id='saveChangesButton' class='standard-button') #{translation.save_changes}
-
-    button(type='button' onclick='toggleCreateResource()' id='createResourceButton' class='standard-button') Create a New Resource
+    div.container(style='text-align: center;')
+        button(type='button' onclick='toggleCreateResource()' id='createResourceButton' class='standard-button' style='margin-right: 10%; display:inline-block;') Create a New Resource
+        form(method='POST' action='/questions' class="form_sign" style='display:inline-block;')
+            input(type='text' hidden=true name='selectedQuestions' value='' id='selectedQuestionsField')
+            input(type='text' hidden=true name='unselectedQuestions' value='' id='unselectedQuestionsField')
+            button(type='submit', id='saveChangesButton' class='standard-button') #{translation.save_changes}
 
     table(style='width:40%', border='1', id='questions_table')
         thead
@@ -169,8 +169,8 @@ block content
                 index = id.rowIndex - 1;
             }
             currentQuestionIndex = index;
-            if (questionsArray[index].questionType == "Teaching Unit") {
-                setModalValues(questionsArray[index]);
+            if (questionsArray[index].questionType != "Multiple Choice" && questionsArray[index].questionType != "Short Answer") {
+                setModalValues(questionsArray[index], parseFloat(ratingForResource[index]));
                 sequenceModal.classList.toggle("show-modal");
             } else {
                 question_text.innerHTML = questionsArray[index].questionText;
@@ -277,20 +277,12 @@ block content
 
                 //set the average rating
                 var stars = ['star1', 'star2', 'star3', 'star4', 'star5'];
-                var starDesign = 'star on';
-                for (var j = 1; j < stars.length + 1; j++) {
-                    if (questionsArray[index].rating > (j - 0.25)) {
-                        document.getElementById(stars[j - 1]).className = starDesign;
-                    } else if (questionsArray[index].rating > (j - 0.75)) {
-                        document.getElementById(stars[j - 1]).className = 'star half';
-                    } else {
-                        starDesign = 'star';
-                        document.getElementById(stars[j - 1]).className = starDesign;
-                    }
-                }
+                setRating(stars, questionsArray[index].rating);
 
                 //set the user rating
-                setUserRating(parseFloat(ratingForResource[index]))
+                var ustars = ['ustar1', 'ustar2', 'ustar3', 'ustar4', 'ustar5'];
+                setRating(ustars, parseFloat(ratingForResource[index]));
+                //setUserRating(parseFloat(ratingForResource[index]))
 
                 modal.classList.toggle("show-modal");
             }
@@ -320,39 +312,19 @@ block content
         }
 
         function rate1star() {
-            document.getElementById('userRating').value = 1
-            document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
-            document.getElementById('questionType').value = questionsArray[currentQuestionIndex].questionType
-            rateButton.disabled = false;
-            setUserRating(1)
+            rateNStars(1, questionsArray[currentQuestionIndex]);
         }
         function rate2stars() {
-            document.getElementById('userRating').value = 2
-            document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
-            document.getElementById('questionType').value = questionsArray[currentQuestionIndex].questionType
-            rateButton.disabled = false;
-            setUserRating(2)
+            rateNStars(2, questionsArray[currentQuestionIndex]);
         }
         function rate3stars() {
-            document.getElementById('userRating').value = 3
-            document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
-            document.getElementById('questionType').value = questionsArray[currentQuestionIndex].questionType
-            rateButton.disabled = false;
-            setUserRating(3)
+            rateNStars(3, questionsArray[currentQuestionIndex]);
         }
         function rate4stars() {
-            document.getElementById('userRating').value = 4
-            document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
-            document.getElementById('questionType').value = questionsArray[currentQuestionIndex].questionType
-            rateButton.disabled = false;
-            setUserRating(4)
+            rateNStars(4, questionsArray[currentQuestionIndex]);
         }
         function rate5stars() {
-            document.getElementById('userRating').value = 5
-            document.getElementById('questionRated').value = questionsArray[currentQuestionIndex].questionID
-            document.getElementById('questionType').value = questionsArray[currentQuestionIndex].questionType
-            rateButton.disabled = false;
-            setUserRating(5)
+            rateNStars(5, questionsArray[currentQuestionIndex]);
         }
 
         function evaluateString(stringToEvaluate) {
