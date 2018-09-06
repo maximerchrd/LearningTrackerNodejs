@@ -43,16 +43,16 @@ router.post('/', function(req, res) {
                 });
             });
 
-            var data = {language: global.language};
+            var data = {language: i18n.getLocale(req)};
             var translation = setTranslation();
             res.render('signin', { title: 'Sign Up' , message: 'You registered successfully!', sign_in_out: i18n.__('sign in'), data: data, translation: translation});
         } else {
-            var data = {language: global.language};
+            var data = {language: i18n.getLocale(req)};
             var translation = setTranslation();
             res.render('sign-up', { title: 'PW MISMATCH', sign_in_out: i18n.__('sign in'), data: data, translation: translation});
         }
     } else {
-        var data = {language: global.language};
+        var data = {language: i18n.getLocale(req)};
         var translation = setTranslation();
         res.render('sign-up', { title: 'ERROR', sign_in_out: i18n.__('sign in'), data: data, translation: translation});
     }
@@ -61,8 +61,6 @@ router.post('/', function(req, res) {
 
 /* GET sign up page. */
 router.get('/', function(req, res, next) {
-    setLanguage(req,res);
-
     var signString = "";
     var signUrl = "";
     if (req.user) {
@@ -72,21 +70,16 @@ router.get('/', function(req, res, next) {
         signString = i18n.__('sign in');
         signUrl = "signin"
     }
-    var data = {language: global.language};
+
+    var language = i18n.getLocale();
+    if (language == "noinit") {
+        language = i18n.getLocale(req);
+    }
+
+    var data = {language: language};
     var translation = setTranslation();
     res.render('sign-up', { sign_in_out: signString, sign_in_out_url: signUrl, data: data, translation: translation});
 });
-
-function setLanguage(req,res) {
-    i18n.init(req, res);
-    if (global.language == "eng") {
-        i18n.setLocale('eng');
-    } else if (global.language == "fra") {
-        i18n.setLocale('fra');
-    } else {
-        global.language = "eng";
-    }
-}
 
 function setTranslation() {
     var translation = {

@@ -63,13 +63,6 @@ passport.use(new LocalStrategy(function (username, password, done) {
 router.get('/', function (req, res, next) {
     //set language
     i18n.init(req, res);
-    if (global.language == "eng") {
-        i18n.setLocale('eng');
-    } else if (global.language == "fra") {
-        i18n.setLocale('fra');
-    } else {
-        global.language = "eng";
-    }
 
     var signString = "";
     var signUrl = "";
@@ -82,7 +75,11 @@ router.get('/', function (req, res, next) {
         signUrl = "signin";
     }
 
-    var data = {language: global.language, message: message};
+    var language = i18n.getLocale();
+    if (language == "noinit") {
+        language = i18n.getLocale(req);
+    }
+    var data = {language: language, message: message};
     var translation = setTranslation();
 
     res.render('signin', {sign_in_out: signString, sign_in_out_url: signUrl, data: data, translation: translation});

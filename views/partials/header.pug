@@ -3,8 +3,8 @@ nav
         li
             form(action="/selectlanguage" method="POST" class="form-language")
                 select(class="select_language" name="language" id="language" onchange="this.form.submit()")
-                    option(value="eng") English
-                    option(value="fra") Français
+                    option(value="en") English
+                    option(value="fr") Français
         li
             a(href="sign-up" class="sign_item") #{translation.sign_up}
         li
@@ -20,8 +20,8 @@ nav
             a(href="home" class="nav_item") #{translation.home}
 script(type='text/javascript').
     var language = !{JSON.stringify(data.language)};
-    if (language == "eng") {
+    if (language == "en") {
         document.getElementById('language').options[0].selected = 'selected';
-    } else if (language == "fra") {
+    } else if (language == "fr") {
         document.getElementById('language').options[1].selected = 'selected';
     }

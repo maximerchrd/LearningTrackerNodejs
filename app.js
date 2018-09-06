@@ -20,8 +20,8 @@ var userProfileRouter = require('./routes/user_profile');
 //initialize internationalization
 var i18n = require("i18n");
 i18n.configure({
-    locales:['eng', 'fra'],
-    defaultLocale: 'eng',
+    locales:['en', 'fr'],
+    defaultLocale: 'noinit',
     directory: __dirname + '/locales'
 });
 //var jsonToDbRouter = require('./bin/jsonToDb');
@@ -46,6 +46,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(flash());
+
+app.use(i18n.init);
 
 app.use('/', indexRouter);
 app.use('/home', indexRouter);

@@ -13,8 +13,6 @@ router.post('/',
     function (req, res) {
 
         if (req.user) {
-            setLanguage(req, res);
-
             //do mysql stuffs
             var sql = "SELECT * FROM users WHERE IDENTIFIER = ?";
             var sqlArg = [req.user];
@@ -55,7 +53,7 @@ router.post('/',
                     });
 
 
-                    var data = {language: global.language, user: username, synckey: synckey};
+                    var data = {language: i18n.getLocale(req), user: username, synckey: synckey};
                     var translation = setTranslation();
 
                     res.render('user_profile', {
@@ -76,8 +74,6 @@ router.post('/',
 router.get('/', function (req, res, next) {
 
     if (req.user) {
-        setLanguage(req, res);
-
         //do mysql stuffs
         var sql = "SELECT * FROM users WHERE IDENTIFIER = ?";
         var sqlArg = [req.user];
@@ -114,7 +110,13 @@ router.get('/', function (req, res, next) {
                 if (synckey == null) {
                     synckey = "";
                 }
-                var data = {language: global.language, user: username, synckey: synckey};
+
+                var language = i18n.getLocale();
+                if (language == "noinit") {
+                    language = i18n.getLocale(req);
+                }
+
+                var data = {language: language, user: username, synckey: synckey};
                 var translation = setTranslation();
 
                 res.render('user_profile', {
@@ -131,17 +133,6 @@ router.get('/', function (req, res, next) {
 
 
 });
-
-function setLanguage(req, res) {
-    i18n.init(req, res);
-    if (global.language == "eng") {
-        i18n.setLocale('eng');
-    } else if (global.language == "fra") {
-        i18n.setLocale('fra');
-    } else {
-        global.language = "eng";
-    }
-}
 
 function setTranslation() {
     var translation = {

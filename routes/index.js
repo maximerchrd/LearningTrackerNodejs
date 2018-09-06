@@ -4,7 +4,6 @@ var i18n = require('i18n');
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-    setLanguage(req,res);
 
     var signString = "";
     var signUrl = "";
@@ -16,21 +15,16 @@ router.get('/', function (req, res, next) {
         signUrl = "signin";
     }
 
-    var data = {language: global.language};
+    var language = i18n.getLocale();
+    if (language == "noinit") {
+        language = i18n.getLocale(req);
+    }
+
+    var data = {language: language};
     translation = setTranslation();
     res.render('index', {sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data});
 });
 
-function setLanguage(req,res) {
-    i18n.init(req, res);
-    if (global.language == "eng") {
-        i18n.setLocale('eng');
-    } else if (global.language == "fra") {
-        i18n.setLocale('fra');
-    } else {
-        global.language = "eng";
-    }
-}
 
 function setTranslation() {
     var translation = {

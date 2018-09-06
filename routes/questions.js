@@ -47,9 +47,6 @@ function Question(questionID, questionText, answers, nbCorrectAnswers, questionT
 
 /* GET questions page. */
 router.get('/', function (req, res, next) {
-
-    setLanguage(req, res);
-
     //reinit question array
     questionsArray = [];
 
@@ -67,14 +64,14 @@ router.get('/', function (req, res, next) {
         if (err) throw err;
         //reinitialize array
         mainSubjects = [["Main subjects", "All regions"]];
-        con.query("SELECT SUBJECT, PROPERTY2 FROM subjects WHERE LANGUAGE=? AND PROPERTY1=?;", [global.language, "main"], function (err, rows) {
+        con.query("SELECT SUBJECT, PROPERTY2 FROM subjects WHERE LANGUAGE=? AND PROPERTY1=?;", [getLanguage(req), "main"], function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
                 mainSubjects.push([rows[i].SUBJECT, rows[i].PROPERTY2]);
             }
         });
         allSubjects = ["All subjects"];
-        con.query("SELECT SUBJECT FROM subjects WHERE LANGUAGE=? AND PROPERTY1!=?;", [global.language, "main"], function (err, rows) {
+        con.query("SELECT SUBJECT FROM subjects WHERE LANGUAGE=? AND PROPERTY1!=?;", [getLanguage(req), "main"], function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
                 allSubjects.push(rows[i].SUBJECT);
@@ -104,7 +101,7 @@ router.get('/', function (req, res, next) {
             "LEFT JOIN (SELECT DISTINCT IDENTIFIER_QUESTION, IDENTIFIER_SUBJECT FROM relation_question_subject WHERE ID IN (SELECT MAX(ID) FROM relation_question_subject GROUP BY IDENTIFIER_QUESTION)) t2" +
             " ON t1.IDENTIFIER = t2.IDENTIFIER_QUESTION " +
             " LEFT JOIN subjects t3 ON t2.IDENTIFIER_SUBJECT = t3.IDENTIFIER " +
-             "WHERE t1.LANGUAGE = '" + global.language + "' LIMIT 500;";
+             "WHERE t1.LANGUAGE = '" + getLanguage(req) + "' LIMIT 500;";
         con.query(sqlQuery, function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
@@ -160,7 +157,7 @@ router.get('/', function (req, res, next) {
                 }
             }
             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                language: global.language, regions: regions, resourcesTypes: resourcesTypes};
+                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes};
             translation = setTranslation();
             res.render('questions', {
                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -172,8 +169,6 @@ router.get('/', function (req, res, next) {
 
 router.post('/', upload.any(), function (req, res) {
     console.log(req.body)
-
-    setLanguage(req, res);
 
     if (req.body.userRating) {
         //save user rating
@@ -250,7 +245,7 @@ router.post('/', upload.any(), function (req, res) {
                             }
 
                             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                                language: global.language, regions: regions, resourcesTypes: resourcesTypes};
+                                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes};
                             translation = setTranslation();
                             res.render('questions', {
                                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -291,10 +286,10 @@ router.post('/', upload.any(), function (req, res) {
             if (req.body.keyword != "") {
                 mcqQuery += " AND QUESTION LIKE ? AND question.LANGUAGE = ?";
                 mcqArg.push("%" + req.body.keyword + "%")
-                mcqArg.push(global.language);
+                mcqArg.push(getLanguage(req));
             } else {
                 mcqQuery += " AND question.LANGUAGE = ?";
-                mcqArg.push(global.language);
+                mcqArg.push(getLanguage(req));
             }
 
             mcqQuery += " LIMIT 500"
@@ -302,10 +297,10 @@ router.post('/', upload.any(), function (req, res) {
             mcqQuery = "SELECT question.*,subjects.SUBJECT FROM question ";
             mcqQuery += "WHERE QUESTION LIKE ? AND question.LANGUAGE = ?";
             mcqArg.push("%" + req.body.keyword + "%");
-            mcqArg.push(global.language);
+            mcqArg.push(getLanguage(req));
         } else {
             mcqQuery += "WHERE question.LANGUAGE = ?";
-            mcqArg.push(global.language);
+            mcqArg.push(getLanguage(req));
         }
 
 
@@ -387,7 +382,7 @@ router.post('/', upload.any(), function (req, res) {
                 }
 
                 data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                    language: global.language, regions: regions, resourcesTypes: resourcesTypes};
+                    language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes};
                 translation = setTranslation();
                 res.render('questions', {
                     sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -471,7 +466,7 @@ router.post('/', upload.any(), function (req, res) {
         }
 
         data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-            language: global.language, regions: regions, resourcesTypes: resourcesTypes};
+            language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes};
         translation = setTranslation();
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -564,7 +559,7 @@ router.post('/', upload.any(), function (req, res) {
         }
 
         data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-            language: global.language, regions: regions, resourcesTypes: resourcesTypes};
+            language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes};
         translation = setTranslation();
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -604,16 +599,12 @@ function intToResourceType(typeCode) {
     }
 }
 
-function setLanguage(req, res) {
-    //set language
-    i18n.init(req, res);
-    if (global.language == "eng") {
-        i18n.setLocale('eng');
-    } else if (global.language == "fra") {
-        i18n.setLocale('fra');
-    } else {
-        global.language = 'eng';
+function getLanguage(req) {
+    var language = i18n.getLocale();
+    if (language == "noinit") {
+        language = i18n.getLocale(req);
     }
+    return language;
 }
 
 function setTranslation() {
