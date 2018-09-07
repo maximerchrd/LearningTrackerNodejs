@@ -141,7 +141,6 @@ block content
             userQuesCombo.disabled = true;
             saveButton.disabled = true;
         }
-        rateButton.disabled = true;
 
         var table = document.getElementById("questions_table");
         var i;
@@ -170,7 +169,7 @@ block content
             }
             currentQuestionIndex = index;
             if (questionsArray[index].questionType != "Multiple Choice" && questionsArray[index].questionType != "Short Answer") {
-                setModalValues(questionsArray[index], parseFloat(ratingForResource[index]));
+                setModalValues(questionsArray[index], parseFloat(ratingForResource[index]), !{JSON.stringify(data.currentUser)});
                 sequenceModal.classList.toggle("show-modal");
             } else {
                 question_text.innerHTML = questionsArray[index].questionText;
@@ -267,6 +266,7 @@ block content
                 }
                 if (!{JSON.stringify(data.currentUser)} == "") {
                     selectButton.disabled = true;
+                    rateButton.disabled = true;
                 } else {
                     if (questionsArray[index].userSelected == "selected.png") {
                         selectButton.innerHTML = "Unselect Question"

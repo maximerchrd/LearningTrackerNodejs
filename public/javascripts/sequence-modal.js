@@ -1,5 +1,4 @@
-importScripts('javascripts/star-rating.js');
-function setModalValues(question, userRating) {
+function setModalValues(question, userRating, user) {
     var resourceTitle = document.getElementById("resourceTitle");
     var resourceType = document.getElementById("resourceType");
     var resourceDescription = document.getElementById("resourceDescription");
@@ -65,6 +64,11 @@ function setModalValues(question, userRating) {
     //make resource editable if user = resource owner
     if (question.editAvailable) {
         document.getElementById("edit-button").style.visibility = "visible";
+    }
+
+    if (user == "") {
+        document.getElementById("rSubmitRating").disabled = true;
+        document.getElementById("rSubmitRating").style.background = "#A9F5D0";
     }
 }
 
