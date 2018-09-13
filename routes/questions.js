@@ -126,7 +126,7 @@ router.get('/', function (req, res, next) {
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                     } else {
                         var questionTypeString = intToResourceType(rows[i].QUESTION_TYPE);
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                         question.mainSubject = rows[i].SUBJECT;
                         if (req.user == rows[i].OWNER_IDENTIFIER) {
                             question.editAvailable = true;
@@ -342,7 +342,7 @@ router.post('/', upload.any(), function (req, res) {
                             } else if (rows[i].QUESTION_TYPE == 1) {
                                 var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                             } else if (rows[i].QUESTION_TYPE == 3) {
-                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                                 question.mainSubject = rows[i].SUBJECT;
                             }
                             questionsArray.push(question);
@@ -484,7 +484,7 @@ router.post('/', upload.any(), function (req, res) {
         for (i = 0; (i + 1) < questionsNotParsed.length; i = i + 2) {
             questions.push([questionsNotParsed[i], questionsNotParsed[i + 1]])
         }
-        console.log(questions)
+        console.log(questions);
         for (i = 0; i < questions.length; i++) {
             questions[i].push(req.user)
             //questions[i].push(new Date().getTime())
@@ -598,7 +598,7 @@ router.post('/', upload.any(), function (req, res) {
                         var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                     } else {
                         var questionTypeString = intToResourceType(rows[i].QUESTION_TYPE);
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                         question.mainSubject = rows[i].SUBJECT;
                         if (req.user == rows[i].OWNER_IDENTIFIER) {
                             question.editAvailable = true;
