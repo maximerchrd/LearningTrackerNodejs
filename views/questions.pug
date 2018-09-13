@@ -168,7 +168,20 @@ block content
                 index = id.rowIndex - 1;
             }
             currentQuestionIndex = index;
-            if (questionsArray[index].questionType != "Multiple Choice" && questionsArray[index].questionType != "Short Answer") {
+            if (questionsArray[index].questionType == "Questions Set") {
+                var form = document.createElement("form");
+                form.setAttribute("method", "post");
+                form.setAttribute("action", "/questions");
+                var hiddenField = document.createElement("input");
+                hiddenField.setAttribute("type", "hidden");
+                hiddenField.setAttribute("name", "testid");
+                hiddenField.setAttribute("value", questionsArray[index].questionID);
+
+                form.appendChild(hiddenField);
+
+                document.body.appendChild(form);
+                form.submit();
+            } else if (questionsArray[index].questionType != "Multiple Choice" && questionsArray[index].questionType != "Short Answer") {
                 setModalValues(questionsArray[index], parseFloat(ratingForResource[index]), !{JSON.stringify(data.currentUser)});
                 sequenceModal.classList.toggle("show-modal");
             } else {

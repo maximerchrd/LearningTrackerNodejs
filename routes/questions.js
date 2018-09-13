@@ -474,7 +474,7 @@ router.post('/', upload.any(), function (req, res) {
         });
     } else if (req.body.selectedQuestions){
         //handle save changes request
-        console.log("posted Save my Changes")
+        console.log("posted Save my Changes");
 
         //parse the post request to a 2d array for selected questions
         var questionsNotParsed = req.body.selectedQuestions.split(",")
@@ -565,6 +565,88 @@ router.post('/', upload.any(), function (req, res) {
             sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
             mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
         });
+    } else if (req.body.testid) {
+        console.log("display test");
+        questionsArray = [];
+        var sqlQuery = "SELECT t1.IDENTIFIER, t1.QUESTION_TYPE, t1.QUESTION, t1.OPTION0, t1.OPTION1, t1.OPTION2, t1.OPTION3," +
+            " t1.OPTION4, t1.OPTION5, t1.OPTION6, t1.OPTION7, t1.OPTION7, t1.OPTION9, t1.NB_CORRECT_ANS, t1.IMAGE_PATH, t1.RATING FROM question t1 " +
+            "INNER JOIN relation_question_question t2 ON t1.IDENTIFIER = t2.IDENTIFIER_QUESTION_1 WHERE t2.IDENTIFIER_TEST = " + req.body.testid + " " +
+            "UNION DISTINCT SELECT t1.IDENTIFIER, t1.QUESTION_TYPE, t1.QUESTION, t1.OPTION0, t1.OPTION1, t1.OPTION2, t1.OPTION3," +
+            " t1.OPTION4, t1.OPTION5, t1.OPTION6, t1.OPTION7, t1.OPTION7, t1.OPTION9, t1.NB_CORRECT_ANS, t1.IMAGE_PATH, t1.RATING FROM question t1 " +
+            "INNER JOIN relation_question_question t2 ON t1.IDENTIFIER = t2.IDENTIFIER_QUESTION_2 WHERE t2.IDENTIFIER_TEST = " + req.body.testid;
+        mysqlConnection.query(sqlQuery, function (err, rows) {
+            if (err) throw err;
+            for (var i in rows) {
+                if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
+                    if (rows[i].QUESTION_TYPE == 0) {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                    } else if (rows[i].QUESTION_TYPE == 1) {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                    } else {
+                        var questionTypeString = intToResourceType(rows[i].QUESTION_TYPE);
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        question.mainSubject = rows[i].SUBJECT;
+                        if (req.user == rows[i].OWNER_IDENTIFIER) {
+                            question.editAvailable = true;
+                        }
+                    }
+                    questionsArray.push(question);
+                } else {
+                    if (rows[i].QUESTION_TYPE == 0) {
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                    } else if (rows[i].QUESTION_TYPE == 1){
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                    } else {
+                        var questionTypeString = intToResourceType(rows[i].QUESTION_TYPE);
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        question.mainSubject = rows[i].SUBJECT;
+                        if (req.user == rows[i].OWNER_IDENTIFIER) {
+                            question.editAvailable = true;
+                        }
+                    }
+                    questionsArray.push(question);
+                }
+            }
+        });
+
+        //get user rating
+        mysqlConnection.query("SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_USER=?",[req.user], function (err, rows) {
+            if (err) throw err;
+
+            var ratingForResourceDictonary = {}
+            ratingForResource = []
+            for (var i in rows) {
+                ratingForResourceDictonary[rows[i].IDENTIFIER_RESOURCE] = rows[i].RATING
+            }
+
+            if (req.user) {
+                signString = i18n.__('sign out');
+                signUrl = "signout";
+                currentUser = req.user;
+            } else {
+                signString = i18n.__('sign in');
+                signUrl = "signin";
+                currentUser = "";
+            }
+
+            //fill array containing the rating for each question using the dictionary as source
+            ratingForResource = [];
+            for (var i in questionsArray) {
+                if (questionsArray[i].questionID in ratingForResourceDictonary) {
+                    ratingForResource.push(ratingForResourceDictonary[questionsArray[i].questionID])
+                } else {
+                    ratingForResource.push(0)
+                }
+            }
+
+            data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
+                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes};
+            translation = setTranslation();
+            res.render('questions', {
+                sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
+                mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
+            });
+        });
     }
 });
 
@@ -588,7 +670,9 @@ function fileTreatment(file, filename, req) {
 }
 
 function intToResourceType(typeCode) {
-    if (typeCode == 3) {
+    if (typeCode == 2) {
+        return "Questions Set";
+    } else if (typeCode == 3) {
         return "Whole Teaching Sequence";
     } else if (typeCode == 4) {
         return "Evaluation / Exercise";
