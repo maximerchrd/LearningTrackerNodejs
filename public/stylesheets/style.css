@@ -31,6 +31,12 @@ a {
   border-radius: 2px;
   font: 12px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
+.small-button:disabled {
+  background-color: #CEF6E3;
+}
+.standard-button:disabled {
+  background-color: #CEF6E3;
+}
 .form-inline {
   padding: 40px 0;
   text-align: center;

@@ -124,6 +124,7 @@ block content
         var rateButton = document.getElementById("submitRating");
         var regionsSelection = document.getElementById("regionsSelector");
         var mainSubjectSelection = document.getElementById("mainSubjectsSelector");
+        var createResourceButton = document.getElementById("createResourceButton");
 
         var questionsArray = !{JSON.stringify(data.questions)};
         var ratingForResource = !{JSON.stringify(data.ratingForResource)};
@@ -140,6 +141,7 @@ block content
         if (!{JSON.stringify(data.currentUser)} == "") {
             userQuesCombo.disabled = true;
             saveButton.disabled = true;
+            createResourceButton.disabled = true;
         }
 
         var table = document.getElementById("questions_table");
