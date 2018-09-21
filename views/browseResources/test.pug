@@ -1,0 +1,23 @@
+table(style='width:40%', border='1', id='test_table')
+    thead
+        tr
+            th(class='test-name') #{data.testName}
+            th
+                div.row
+                    div.star-label #{translation.average_rating}:
+                    div(class='stars')
+                        span(class="star" id="teststar1")
+                        span(class="star" id="teststar2")
+                        span(class="star" id="teststar3")
+                        span(class="star" id="teststar4")
+                        span(class="star" id="teststar5")
+                div.row
+                    div.star-label #{translation.your_rating}:
+                    div(class='stars')
+                        span(class="star" id="testustar1" onclick='rate1star()')
+                        span(class="star" id="testustar2" onclick='rate2stars()')
+                        span(class="star" id="testustar3" onclick='rate3stars()')
+                        span(class="star" id="testustar4" onclick='rate4stars()')
+                        span(class="star" id="testustar5" onclick='rate5stars()')
+            th
+                img(id="checkboxImage", src="/images/notselected.png")

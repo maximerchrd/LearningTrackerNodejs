@@ -4,6 +4,7 @@ block content
     include partials/header.pug
     script(src='javascripts/star-rating.js')
     script(src='javascripts/sequence-modal.js')
+    script(src='javascripts/test.js')
     form(method='POST' action='/questions' class="form-inline")
         div.form-group
             select(name='selectionFilter', id='userQuestionsCombobox')
@@ -31,6 +32,8 @@ block content
             input(type='text' hidden=true name='selectedQuestions' value='' id='selectedQuestionsField')
             input(type='text' hidden=true name='unselectedQuestions' value='' id='unselectedQuestionsField')
             button(type='submit', id='saveChangesButton' class='standard-button') #{translation.save_changes}
+
+    include browseResources/test
 
     table(style='width:40%', border='1', id='questions_table')
         thead
@@ -126,6 +129,7 @@ block content
         var mainSubjectSelection = document.getElementById("mainSubjectsSelector");
         var createResourceButton = document.getElementById("createResourceButton");
 
+        var testName = !{JSON.stringify(data.testName)};
         var questionsArray = !{JSON.stringify(data.questions)};
         var ratingForResource = !{JSON.stringify(data.ratingForResource)};
         var mainSubjectsArray = !{JSON.stringify(mainSubjects)};
@@ -144,9 +148,11 @@ block content
             createResourceButton.disabled = true;
         }
 
+        initTest(testName);
+
         var table = document.getElementById("questions_table");
         var i;
-        for (i = 0; table.rows.length - 1; i++) {
+        for (i = 0; i < table.rows.length - 1; i++) {
             var tstars = ['_tstar1', '_tstar2', '_tstar3', '_tstar4', '_tstar5'];
             var starDesign = 'star on';
 

@@ -64,6 +64,20 @@ div.form-group {
   margin-top: 20px;
 }
 
+#test_table {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  margin: auto;
+  margin-top: 20px;
+  visibility: collapse;
+}
+
+.test-name {
+  width: 40%;
+  max-width: 40%;
+}
+
 #questions_table td, #questions_table th {
   border: 1px solid #ddd;
   padding: 8px;

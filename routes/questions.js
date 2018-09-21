@@ -157,7 +157,7 @@ router.get('/', function (req, res, next) {
                 }
             }
             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes};
+                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, testName: ""};
             translation = setTranslation();
             res.render('questions', {
                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -245,7 +245,7 @@ router.post('/', upload.any(), function (req, res) {
                             }
 
                             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes};
+                                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, testName: ""};
                             translation = setTranslation();
                             res.render('questions', {
                                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -382,7 +382,7 @@ router.post('/', upload.any(), function (req, res) {
                 }
 
                 data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                    language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes};
+                    language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, testName: ""};
                 translation = setTranslation();
                 res.render('questions', {
                     sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -466,7 +466,7 @@ router.post('/', upload.any(), function (req, res) {
         }
 
         data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-            language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes};
+            language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, testName: ""};
         translation = setTranslation();
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -559,7 +559,7 @@ router.post('/', upload.any(), function (req, res) {
         }
 
         data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-            language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes};
+            language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, testName: ""};
         translation = setTranslation();
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -567,6 +567,7 @@ router.post('/', upload.any(), function (req, res) {
         });
     } else if (req.body.testid) {
         console.log("display test");
+        var testName = "";
         questionsArray = [];
         var sqlQuery = "SELECT t1.IDENTIFIER, t1.QUESTION_TYPE, t1.QUESTION, t1.OPTION0, t1.OPTION1, t1.OPTION2, t1.OPTION3," +
             " t1.OPTION4, t1.OPTION5, t1.OPTION6, t1.OPTION7, t1.OPTION7, t1.OPTION9, t1.NB_CORRECT_ANS, t1.IMAGE_PATH, t1.RATING FROM question t1 " +
@@ -609,6 +610,14 @@ router.post('/', upload.any(), function (req, res) {
             }
         });
 
+        var sqlQuery = "SELECT QUESTION FROM question WHERE IDENTIFIER=" + req.body.testid;
+        mysqlConnection.query(sqlQuery, function (err, rows) {
+            if (err) throw err;
+            for (var i in rows) {
+                testName = rows[i].QUESTION;
+            }
+        });
+
         //get user rating
         mysqlConnection.query("SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_USER=?",[req.user], function (err, rows) {
             if (err) throw err;
@@ -640,7 +649,7 @@ router.post('/', upload.any(), function (req, res) {
             }
 
             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes};
+                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, testName: testName};
             translation = setTranslation();
             res.render('questions', {
                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
