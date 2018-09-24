@@ -129,7 +129,7 @@ block content
         var mainSubjectSelection = document.getElementById("mainSubjectsSelector");
         var createResourceButton = document.getElementById("createResourceButton");
 
-        var testName = !{JSON.stringify(data.testName)};
+        var test = !{JSON.stringify(data.test)};
         var questionsArray = !{JSON.stringify(data.questions)};
         var ratingForResource = !{JSON.stringify(data.ratingForResource)};
         var mainSubjectsArray = !{JSON.stringify(mainSubjects)};
@@ -148,7 +148,7 @@ block content
             createResourceButton.disabled = true;
         }
 
-        initTest(testName);
+        initTest(test, !{JSON.stringify(data.currentUser)}, selectedQuestions, unselectedQuestions, questionsArray);
 
         var table = document.getElementById("questions_table");
         var i;

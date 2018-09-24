@@ -1,7 +1,9 @@
+
+
 table(style='width:40%', border='1', id='test_table')
     thead
         tr
-            th(class='test-name') #{data.testName}
+            th(id='test-name') test name
             th
                 div.row
                     div.star-label #{translation.average_rating}:
@@ -14,10 +16,16 @@ table(style='width:40%', border='1', id='test_table')
                 div.row
                     div.star-label #{translation.your_rating}:
                     div(class='stars')
-                        span(class="star" id="testustar1" onclick='rate1star()')
-                        span(class="star" id="testustar2" onclick='rate2stars()')
-                        span(class="star" id="testustar3" onclick='rate3stars()')
-                        span(class="star" id="testustar4" onclick='rate4stars()')
-                        span(class="star" id="testustar5" onclick='rate5stars()')
+                        span(class="star" id="testustar1" onclick='setTestUserRating(1)')
+                        span(class="star" id="testustar2" onclick='setTestUserRating(2)')
+                        span(class="star" id="testustar3" onclick='setTestUserRating(3)')
+                        span(class="star" id="testustar4" onclick='setTestUserRating(4)')
+                        span(class="star" id="testustar5" onclick='setTestUserRating(5)')
+                div.row
+                    form(method='POST' action='/questions' class="form-rating")
+                        input(type='text' hidden=true name='userRating' value='' id='userRating')
+                        input(type='text' hidden=true name='questionRated' value='' id='questionRated')
+                        input(type='text' hidden=true name='questionType' value='' id='questionType')
+                        button(type='submit', id='submitRating' class='small-button') #{translation.submit_my_rating}
             th
-                img(id="checkboxImage", src="/images/notselected.png")
+                img(id="testCheckboxImage" onclick="toggleSelection()" src="/images/notselected.png")

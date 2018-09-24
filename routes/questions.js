@@ -157,7 +157,7 @@ router.get('/', function (req, res, next) {
                 }
             }
             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, testName: ""};
+                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, test: ""};
             translation = setTranslation();
             res.render('questions', {
                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -172,6 +172,7 @@ router.post('/', upload.any(), function (req, res) {
 
     if (req.body.userRating) {
         //save user rating
+        console.log("save user rating");
         if (!req.user) {
             res.render('signin', {sign_in_out: signString, sign_in_out_url: signUrl});
         } else {
@@ -382,7 +383,7 @@ router.post('/', upload.any(), function (req, res) {
                 }
 
                 data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                    language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, testName: ""};
+                    language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, test: ""};
                 translation = setTranslation();
                 res.render('questions', {
                     sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -392,7 +393,7 @@ router.post('/', upload.any(), function (req, res) {
         });
     } else if (req.files) {
         //insert resource into db
-
+        console.log("insert Resource");
         //code the type of resource
         var typeCode = 3;
         if (req.body.resourceType == "Evaluation / Exercise") {
@@ -466,28 +467,27 @@ router.post('/', upload.any(), function (req, res) {
         }
 
         data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-            language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, testName: ""};
+            language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, test: ""};
         translation = setTranslation();
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
             mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
         });
-    } else if (req.body.selectedQuestions){
+    } else if (req.body.selectedQuestions || req.body.unselectedQuestions) {
         //handle save changes request
         console.log("posted Save my Changes");
 
         //parse the post request to a 2d array for selected questions
-        var questionsNotParsed = req.body.selectedQuestions.split(",")
-        questionsNotParsed.shift()
+        var questionsNotParsed = req.body.selectedQuestions.split(",");
+        questionsNotParsed.shift();
         var questions = [];
         var i;
         for (i = 0; (i + 1) < questionsNotParsed.length; i = i + 2) {
-            questions.push([questionsNotParsed[i], questionsNotParsed[i + 1]])
+            questions.push([questionsNotParsed[i], questionsNotParsed[i + 1]]);
         }
         console.log(questions);
         for (i = 0; i < questions.length; i++) {
-            questions[i].push(req.user)
-            //questions[i].push(new Date().getTime())
+            questions[i].push(req.user);
         }
 
         //parse the post request to an array for unselected questions
@@ -509,7 +509,7 @@ router.post('/', upload.any(), function (req, res) {
             if (err) throw err;
 
             if (questions.length > 0) {
-                var sql = "INSERT INTO relation_resource_user (IDENTIFIER_RESOURCE, RESOURCE_TYPE, IDENTIFIER_USER) VALUES ?";
+                var sql = "REPLACE INTO relation_resource_user (IDENTIFIER_RESOURCE, RESOURCE_TYPE, IDENTIFIER_USER) VALUES ?";
                 con.query(sql, [questions], function (err, result) {
                     if (err) throw err;
                     console.log("Number of records inserted: " + result.affectedRows);
@@ -530,36 +530,36 @@ router.post('/', upload.any(), function (req, res) {
 
 
         //change the user selection for the corresponding questions in array
-        var questionIDs = []
+        var questionIDs = [];
         var i;
         for (i = 0; i < questions.length; i++) {
-            questionIDs.push(questions[i][0])
+            questionIDs.push(questions[i][0]);
         }
         for (i = 0; i < questionsArray.length; i++) {
             if (questionIDs.indexOf(questionsArray[i].questionID) != -1) {
-                questionsArray[i].userSelected = "selected.png"
+                questionsArray[i].userSelected = "selected.png";
             }
         }
         //same for unselected questions
-        var questionIDsUnselected = []
+        var questionIDsUnselected = [];
         for (i = 0; i < questionsUnselected.length; i++) {
             questionIDsUnselected.push(questionsUnselected[i])
         }
         for (i = 0; i < questionsArray.length; i++) {
             if (questionIDsUnselected.indexOf(questionsArray[i].questionID) != -1) {
-                questionsArray[i].userSelected = "notselected.png"
+                questionsArray[i].userSelected = "notselected.png";
             }
         }
 
         //sets empty string in case user is undefined
         if (req.user) {
-            currentUser = req.user
+            currentUser = req.user;
         } else {
-            currentUser = ""
+            currentUser = "";
         }
 
         data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-            language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, testName: ""};
+            language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, test: ""};
         translation = setTranslation();
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
@@ -567,7 +567,7 @@ router.post('/', upload.any(), function (req, res) {
         });
     } else if (req.body.testid) {
         console.log("display test");
-        var testName = "";
+        var test = [];
         questionsArray = [];
         var sqlQuery = "SELECT t1.IDENTIFIER, t1.QUESTION_TYPE, t1.QUESTION, t1.OPTION0, t1.OPTION1, t1.OPTION2, t1.OPTION3," +
             " t1.OPTION4, t1.OPTION5, t1.OPTION6, t1.OPTION7, t1.OPTION7, t1.OPTION9, t1.NB_CORRECT_ANS, t1.IMAGE_PATH, t1.RATING FROM question t1 " +
@@ -610,14 +610,36 @@ router.post('/', upload.any(), function (req, res) {
             }
         });
 
-        var sqlQuery = "SELECT QUESTION FROM question WHERE IDENTIFIER=" + req.body.testid;
+        //select data to display test name, ratings and selection
+        sqlQuery = "SELECT * FROM question WHERE IDENTIFIER=" + req.body.testid;
         mysqlConnection.query(sqlQuery, function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
-                testName = rows[i].QUESTION;
+                test.push(rows[i].QUESTION);
+                test.push(req.body.testid);
+                test.push(rows[i].RATING);
             }
         });
 
+        if (req.user) {
+            sqlQuery = "SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_RESOURCE=" + req.body.testid +
+                " AND IDENTIFIER_USER='" + req.user + "'";
+            mysqlConnection.query(sqlQuery, function (err, rows) {
+                if (err) throw err;
+                for (var i in rows) {
+                    test.push(rows[i].RATING);
+                }
+            });
+
+            sqlQuery = "SELECT * FROM relation_resource_user WHERE IDENTIFIER_RESOURCE=" + req.body.testid +
+                " AND IDENTIFIER_USER='" + req.user + "'";
+            mysqlConnection.query(sqlQuery, function (err, rows) {
+                if (err) throw err;
+                if (rows.length > 0) {
+                    test.push("selected");
+                }
+            });
+        }
         //get user rating
         mysqlConnection.query("SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_USER=?",[req.user], function (err, rows) {
             if (err) throw err;
@@ -649,13 +671,15 @@ router.post('/', upload.any(), function (req, res) {
             }
 
             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, testName: testName};
+                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, test: test};
             translation = setTranslation();
             res.render('questions', {
                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
                 mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
             });
         });
+    } else {
+        res.redirect("/questions");
     }
 });
 

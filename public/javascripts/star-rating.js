@@ -21,6 +21,14 @@ function rateNStars(nStars, question) {
     setRating(ustars, nStars);
 }
 
+function rateTestNStars(nStars, testID) {
+    document.getElementById('userRating').value = nStars
+    document.getElementById('questionRated').value = testID
+    document.getElementById('questionType').value = "Question Set";
+    rateButton.disabled = false;
+}
+
+
 function rateResourceNStars(nStars, question) {
     document.getElementById('ruserRating').value = nStars
     document.getElementById('rquestionRated').value = question.questionID;
