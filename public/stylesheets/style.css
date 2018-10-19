@@ -16,6 +16,7 @@ a {
   color: #00B7FF;
 }
 .standard-button {
+  cursor: pointer;
   background-color: #00e6a1;
   color: white;
   padding: 10px 18px;
@@ -24,6 +25,7 @@ a {
   font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 .small-button {
+  cursor: pointer;
   background-color: #00e6a1;
   color: white;
   padding: 3px 10px;
@@ -50,8 +52,28 @@ a {
   width: 200px;
 }
 
+.left-panel{
+  position: fixed;
+  left: 3%;
+  top: 15%;
+}
+
+.right-panel{
+  position: fixed;
+  right: 3%;
+  top: 15%;
+}
+@media screen and (max-width: 720px) {
+  .right-panel {
+    position: inherit;
+  }
+
+  .left-panel{
+    position: inherit;
+  }
+}
+
 div.form-group {
-  display: inline;
   margin: 20px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }

@@ -1,5 +1,7 @@
 nav
-    ul
+    a(href="home" class="title")
+        img(src="/images/website-logo.png" style="width:66px;height:65px; diplay: inline")
+    ul(style="height: 35px;")
         li
             form(action="/selectlanguage" method="POST" class="form-language")
                 select(class="select_language" name="language" id="language" onchange="this.form.submit()")
@@ -11,9 +13,7 @@ nav
             a(href=sign_in_out_url class="sign_item") #{sign_in_out}
         li
             a(href="user_profile" class="sign_item") My profile
-    ul
-        li
-            a(href="home" class="title") Koeko
+    ul(style="height: 55px;")
         li
             a(href="questions" class="nav_item") #{translation.questions}
         li

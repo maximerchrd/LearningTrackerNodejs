@@ -5,33 +5,33 @@ block content
     script(src='javascripts/star-rating.js')
     script(src='javascripts/sequence-modal.js')
     script(src='javascripts/test.js')
-    form(method='POST' action='/questions' class="form-inline")
+    form(method='POST' action='/questions' class="left-panel")
         div.form-group
-            select(name='selectionFilter', id='userQuestionsCombobox')
+            select(name='selectionFilter', id='userQuestionsCombobox', class='search-select')
                 each filter in questSelectedFilter
                     option(value=filter) #{filter}
         div.form-group
-            select(name='regions', id='regionsSelector')
+            select(name='regions', id='regionsSelector', class='search-select')
                 each region in data.regions
                     option(value=region) #{region}
         div.form-group
-            select(name='mainSubjectFilter', id='mainSubjectsSelector')
+            select(name='mainSubjectFilter', id='mainSubjectsSelector', class='search-select')
                 each subject in mainSubjects
                     option(value=subject[0]) #{subject[0]}
         div.form-group
-            select(name='subjectFilter')
+            select(name='subjectFilter', class='search-select')
                 each subject in allSubjects
                     option(value=subject) #{subject}
         div.form-group
-            input#keyword.form-control(type='keyword', placeholder='key word', name='keyword')
+            input#keyword.form-control(type='keyword', placeholder='key word', name='keyword', class='elements-questions')
         div.form-group
-            button.btn.btn-primary(type='submit' class='small-button') #{translation.search}
-    div.container(style='text-align: center;')
-        button(type='button' onclick='toggleCreateResource()' id='createResourceButton' class='standard-button' style='margin-right: 10%; display:inline-block;') Create a New Resource
-        form(method='POST' action='/questions' class="form_sign" style='display:inline-block;')
+            button.btn.btn-primary(type='submit' class='standard-button elements-questions') #{translation.search}
+    div.container(style='text-align: center;' class='right-panel')
+        button(type='button' onclick='toggleCreateResource()' id='createResourceButton' class='standard-button elements-questions') Create a New Resource
+        form(method='POST' action='/questions' class="form_sign")
             input(type='text' hidden=true name='selectedQuestions' value='' id='selectedQuestionsField')
             input(type='text' hidden=true name='unselectedQuestions' value='' id='unselectedQuestionsField')
-            button(type='submit', id='saveChangesButton' class='standard-button') #{translation.save_changes}
+            button(type='submit', id='saveChangesButton' class='standard-button elements-questions') #{translation.save_changes}
 
     include browseResources/test
 
