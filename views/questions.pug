@@ -404,10 +404,9 @@ block content
             var table = document.getElementById("questions_table");
             var i = table.rows.length - 1
             var j = table.rows.length
-            var questionIndex = i
             for (; i < questionsArray.length && i < 10 + j; i++) {
-                var html_image = ["<img src='/users_images/mini_" + questionsArray[questionIndex].imageName + "' id='imageQuest'>"]
-                var html_rating = ["<div class='stars'><span class='star' id='" + questionIndex + "_tstar1'></span><span class='star' id='" + questionIndex + "_tstar2'></span><span class='star' id='" + questionIndex + "_tstar3'></span><span class='star' id='" + questionIndex + "_tstar4'></span><span class='star' id='" + questionIndex + "_tstar5'></span></div>"]
+                var html_image = ["<img src='/users_images/mini_" + questionsArray[i].imageName + "' id='imageQuest'>"]
+                var html_rating = ["<div class='stars'><span class='star' id='" + i + "_tstar1'></span><span class='star' id='" + i + "_tstar2'></span><span class='star' id='" + i + "_tstar3'></span><span class='star' id='" + i + "_tstar4'></span><span class='star' id='" + i + "_tstar5'></span></div>"]
                 var row = table.insertRow(table.rows.length);
                 row.setAttribute("onclick", "toggleModal(this)", 0);
 
@@ -417,23 +416,23 @@ block content
                 var cell4 = row.insertCell(3);
                 var cell5 = row.insertCell(4);
 
-                cell1.innerHTML = questionsArray[questionIndex].questionText;
-                cell2.innerHTML = questionsArray[questionIndex].questionType;
+                cell1.innerHTML = questionsArray[i].questionText;
+                cell2.innerHTML = questionsArray[i].questionType;
                 cell3.innerHTML = html_image
                 cell4.innerHTML = html_rating
-                cell5.innerHTML = "<img id='checkboxImage" + questionIndex + "' src='/images/" + questionsArray[questionIndex].userSelected + "' >"
+                cell5.innerHTML = "<img id='checkboxImage" + i + "' src='/images/" + questionsArray[i].userSelected + "' >"
 
                 var tstars = ['_tstar1', '_tstar2', '_tstar3', '_tstar4', '_tstar5'];
                 var starDesign = 'star on';
 
                 for (var k = 1; k < tstars.length + 1; k++) {
-                    if (questionsArray[questionIndex].rating > (k - 0.25)) {
-                        document.getElementById(questionIndex + tstars[k - 1]).className = starDesign;
-                    } else if (questionsArray[questionIndex].rating > (k - 0.75)) {
-                        document.getElementById(questionIndex + tstars[k - 1]).className = 'star half';
+                    if (questionsArray[i].rating > (k - 0.25)) {
+                        document.getElementById(i + tstars[k - 1]).className = starDesign;
+                    } else if (questionsArray[i].rating > (k - 0.75)) {
+                        document.getElementById(i + tstars[k - 1]).className = 'star half';
                     } else {
                         starDesign = 'star';
-                        document.getElementById(questionIndex + tstars[k - 1]).className = starDesign;
+                        document.getElementById(i + tstars[k - 1]).className = starDesign;
                     }
                 }
             }
