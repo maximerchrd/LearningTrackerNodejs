@@ -29,28 +29,28 @@ function setModalValues(question, userRating, user) {
         mainSubject.value = question.mainSubject;
     }
     if (question.answers[1] && question.answers[1] != "none") {
-        filename1.value = question.answers[1].split("***")[1];
-        download1.innerHTML = question.answers[1].split("***")[1];
-        download1.download = question.answers[1].split("***")[1];
-        download1.href = "users_files/" + question.answers[1].split("***")[0];
+        filename1.value = question.answers[1].split("___")[1];
+        download1.innerHTML = question.answers[1].split("___")[1];
+        download1.download = question.answers[1].split("___")[1];
+        download1.href = "users_files/" + question.answers[1].split("___")[0];
     }
     if (question.answers[2] && question.answers[2] != "none") {
-        filename2.value = question.answers[2].split("***")[1];
-        download2.innerHTML = question.answers[2].split("***")[1];
-        download2.download = question.answers[2].split("***")[1];
-        download2.href = "users_files/" + question.answers[2].split("***")[0];
+        filename2.value = question.answers[2].split("___")[1];
+        download2.innerHTML = question.answers[2].split("___")[1];
+        download2.download = question.answers[2].split("___")[1];
+        download2.href = "users_files/" + question.answers[2].split("___")[0];
     }
     if (question.answers[3] && question.answers[3] != "none") {
-        filename3.value = question.answers[3].split("***")[1];
-        download3.innerHTML = question.answers[3].split("***")[1];
-        download3.download = question.answers[3].split("***")[1];
-        download3.href = "users_files/" + question.answers[3].split("***")[0];
+        filename3.value = question.answers[3].split("___")[1];
+        download3.innerHTML = question.answers[3].split("___")[1];
+        download3.download = question.answers[3].split("___")[1];
+        download3.href = "users_files/" + question.answers[3].split("___")[0];
     }
     if (question.answers[4] && question.answers[4] != "none") {
-        filename4.value = question.answers[4].split("***")[1];
-        download4.innerHTML = question.answers[4].split("***")[1];
-        download4.download = question.answers[4].split("***")[1];
-        download4.href = "users_files/" + question.answers[4].split("***")[0];
+        filename4.value = question.answers[4].split("___")[1];
+        download4.innerHTML = question.answers[4].split("___")[1];
+        download4.download = question.answers[4].split("___")[1];
+        download4.href = "users_files/" + question.answers[4].split("___")[0];
     }
 
     //set the average rating

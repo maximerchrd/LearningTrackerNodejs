@@ -419,12 +419,12 @@ router.post('/', upload.any(), function (req, res) {
         var filename3 = "none";
         var filename4 = "none";
         var imagename = "none";
-
-        fileTreatment(req.files[0], filename1, req);
-        fileTreatment(req.files[1], filename2, req);
-        fileTreatment(req.files[2], filename3, req);
-        fileTreatment(req.files[3], filename4, req);
-        fileTreatment(req.files[4], imagename, req);
+        var filenames = [filename1, filename2, filename3, filename4, imagename];
+        filenames = fileTreatment(req.files[0], filenames, req);
+        filenames = fileTreatment(req.files[1], filenames, req);
+        filenames = fileTreatment(req.files[2], filenames, req);
+        filenames = fileTreatment(req.files[3], filenames, req);
+        filenames = fileTreatment(req.files[4], filenames, req);
 
         //deal with other possibly empty fields
         var resourceTitle = "none";
@@ -442,7 +442,7 @@ router.post('/', upload.any(), function (req, res) {
         }
 
         var resource = [uid, typeCode, resourceTitle, resourceDescription,
-            filename1, filename2, filename3, filename4, imagename, datetime, global.language, user];
+            filenames[0], filenames[1], filenames[2], filenames[3], filenames[4], datetime, getLanguage(req), user];
         var sql = "INSERT INTO question (IDENTIFIER, QUESTION_TYPE, QUESTION, OPTION0, OPTION1, OPTION2, OPTION3, OPTION4," +
             "IMAGE_PATH, MODIF_DATE, LANGUAGE, OWNER_IDENTIFIER) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
         mysqlConnection.query(sql, resource, function (err, result) {
@@ -683,22 +683,37 @@ router.post('/', upload.any(), function (req, res) {
     }
 });
 
-function fileTreatment(file, filename, req) {
+function fileTreatment(file, filenames, req) {
     if (file) {
         if (file.fieldname == "filetoupload1") {
-            filename = file.filename + "***" + req.body.filename1;
+            filenames[0] = file.filename + "___" + req.body.filename1.replace(" ", "_");
+            fs.rename("public/users_files/" + file.filename, "public/users_files/" + filenames[0], function (err) {
+                if (err) throw err;
+            });
         } else if (file.fieldname == "filetoupload1") {
-            filename = file.filename + "***" + req.body.filename2;
+            filenames[1] = file.filename + "___" + req.body.filename2.replace(" ", "_");
+            fs.rename("public/users_files/" + file.filename, "public/users_files/" + filenames[1], function (err) {
+                if (err) throw err;
+            });
         } else if (file.fieldname == "filetoupload1") {
-            filename = file.filename + "***" + req.body.filename3;
+            filenames[2] = file.filename + "___" + req.body.filename3.replace(" ", "_");
+            fs.rename("public/users_files/" + file.filename, "public/users_files/" + filenames[2], function (err) {
+                if (err) throw err;
+            });
         } else if (file.fieldname == "filetoupload1") {
-            filename = file.filename + "***" + req.body.filename4;
+            filenames[3] = file.filename + "___" + req.body.filename4.replace(" ", "_");
+            fs.rename("public/users_files/" + file.filename, "public/users_files/" + filenames[3], function (err) {
+                if (err) throw err;
+            });
         } else if (file.fieldname == "imagefile") {
-            filename = file.filename;
-            fs.rename("public/users_files/" + filename, "public/users_images/" + filename, function (err) {
+            filenames[4] = file.filename.replace(" ", "_");
+            fs.rename("public/users_files/" + file.filename, "public/users_images/" + filenames[4], function (err) {
                 if (err) throw err;
             });
         }
+        return filenames;
+    } else {
+        return filenames;
     }
 }
 
