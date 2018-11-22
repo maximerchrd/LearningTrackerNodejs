@@ -617,6 +617,7 @@ router.post('/', upload.any(), function (req, res) {
             for (var i in rows) {
                 test.push(rows[i].QUESTION);
                 test.push(req.body.testid);
+                test.push(rows[i].IMAGE_PATH);
                 test.push(rows[i].RATING);
             }
         });

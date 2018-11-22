@@ -12,11 +12,16 @@ function initTest(test, user, selectedQuest, unselectedQuest, questionsArray) {
         questArray = questionsArray;
         document.getElementById("test_table").style.visibility = "visible";
         document.getElementById("test-name").innerHTML = test[0];
+        if (test[2].length > 0) {
+            document.getElementById("test-media").href = "users_images/" + test[2];
+        } else {
+            document.getElementById("test-media").innerHTML = "no media associated";
+        }
 
         //set the average ratings
         var tstars = ['teststar1', 'teststar2', 'teststar3', 'teststar4', 'teststar5'];
         var starDesign = 'star on';
-        var rating = parseFloat(test[2]);
+        var rating = parseFloat(test[3]);
 
         for (var j = 1; j < tstars.length + 1; j++) {
             if (rating > (j - 0.25)) {
@@ -32,7 +37,7 @@ function initTest(test, user, selectedQuest, unselectedQuest, questionsArray) {
         //set the user rating
         var tustars = ['testustar1', 'testustar2', 'testustar3', 'testustar4', 'testustar5'];
         var starDesign = 'star on';
-        var rating = parseFloat(test[3]);
+        var rating = parseFloat(test[4]);
 
         for (var j = 1; j < tstars.length + 1; j++) {
             if (rating > (j - 0.25)) {
