@@ -42,6 +42,8 @@ function Question(questionID, questionText, answers, nbCorrectAnswers, questionT
     this.userSelected = userSelected;
     this.mainSubject = "";
     this.editAvailable = false;
+    this.equivalenceId = -1;
+    this.version = -1;
 }
 
 
@@ -263,7 +265,6 @@ router.post('/', upload.any(), function (req, res) {
         //reinit question array
         questionsArray = [];
         var mcqQuery = "SELECT * FROM question ";
-        var shrtaqArg = [];
         var mcqArg = [];
 
         console.log(req.body.subjectFilter);
@@ -413,7 +414,10 @@ router.post('/', upload.any(), function (req, res) {
             + currentdate.getUTCMinutes() + ":"
             + currentdate.getUTCSeconds() + ":"
             + currentdate.getUTCMilliseconds();
+
         const uid = new Date().getTime();
+        const equivalenceId = uid;
+
         var filename1 = "none";
         var filename2 = "none";
         var filename3 = "none";
@@ -441,10 +445,10 @@ router.post('/', upload.any(), function (req, res) {
             user = req.user;
         }
 
-        var resource = [uid, typeCode, resourceTitle, resourceDescription,
+        var resource = [uid, equivalenceId, typeCode, resourceTitle, resourceDescription,
             filenames[0], filenames[1], filenames[2], filenames[3], filenames[4], datetime, getLanguage(req), user];
-        var sql = "INSERT INTO question (IDENTIFIER, QUESTION_TYPE, QUESTION, OPTION0, OPTION1, OPTION2, OPTION3, OPTION4," +
-            "IMAGE_PATH, MODIF_DATE, LANGUAGE, OWNER_IDENTIFIER) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+        var sql = "INSERT INTO question (IDENTIFIER, EQUIVALENCE_ID, QUESTION_TYPE, QUESTION, OPTION0, OPTION1, OPTION2, OPTION3, OPTION4," +
+            "IMAGE_PATH, MODIF_DATE, LANGUAGE, OWNER_IDENTIFIER) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
         mysqlConnection.query(sql, resource, function (err, result) {
             if (err) throw err;
             console.log("Number of records inserted: " + result.affectedRows);

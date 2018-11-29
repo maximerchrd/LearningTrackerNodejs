@@ -4,6 +4,9 @@
         form(method='POST' action='/questions' class="form-resource" enctype='multipart/form-data' id='createresourceform')
             ul(class='ul-resource')
                 li
+                    input(type='text' name='isNewVersion' value='NO' id='isNewVersion' style='visibility: hidden;')
+                    input(type='text' name='resourceIdentifier' value='' id='resourceIdentifier' style='visibility: hidden;')
+                li
                     input(type='text' name='resourceTitle' value='' id='resourceTitle' placeholder='Title' class='form-resource-textfield' disabled=true)
                     select(name='resourceType' id='resourceType' disabled=true class='resource-select')
                         each resourceType in data.resourcesTypes
@@ -35,7 +38,10 @@
                     input(type='file' name='imagefile' id='imagefile' style='visibility: hidden;')
                 li
                     input(type='submit' id='createResource' class='small-button' value='Save Resource' style='visibility: hidden;')
+                li
+                    input(type='submit' id='createVersion' class='small-button' value='Save Version' style='visibility: hidden;')
         button(onclick='startEditResource()' class='small-button' id="edit-button" style='visibility: hidden;') Edit
+        button(onclick='startNewVersion()' class='small-button' id="version-button" style='visibility: hidden;') New Version
         hr(color='gray')
         div.row
             div.star-label #{translation.average_rating}:

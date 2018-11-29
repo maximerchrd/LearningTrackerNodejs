@@ -69,6 +69,8 @@ function setModalValues(question, userRating, user) {
     if (user == "") {
         document.getElementById("rSubmitRating").disabled = true;
         document.getElementById("rSubmitRating").style.background = "#A9F5D0";
+    } else {
+        document.getElementById("version-button").style.visibility = "visible";
     }
 }
 
@@ -110,4 +112,33 @@ function startEditResource() {
     document.getElementById("resourceType").disabled = false;
     document.getElementById("resourceDescription").disabled = false;
     document.getElementById("mainSubject").disabled = false;
+
+    document.getElementById("resourceIdentifier").value = question.questionID;
+}
+
+function startNewVersion() {
+    document.getElementById("filename1").style.visibility = "visible";
+    document.getElementById("filename2").style.visibility = "visible";
+    document.getElementById("filename3").style.visibility = "visible";
+    document.getElementById("filename4").style.visibility = "visible";
+    document.getElementById("filetoupload1").style.visibility = "visible";
+    document.getElementById("filetoupload2").style.visibility = "visible";
+    document.getElementById("filetoupload3").style.visibility = "visible";
+    document.getElementById("filetoupload4").style.visibility = "visible";
+    document.getElementById("download1").style.visibility = "hidden";
+    document.getElementById("download2").style.visibility = "hidden";
+    document.getElementById("download3").style.visibility = "hidden";
+    document.getElementById("download4").style.visibility = "hidden";
+    document.getElementById("edit-button").style.visibility = "hidden";
+    document.getElementById("imageFileLabel").style.visibility = "visible";
+    document.getElementById("imagefile").style.visibility = "visible";
+    document.getElementById("createVersion").style.visibility = "visible";
+
+    document.getElementById("resourceTitle").disabled = false;
+    document.getElementById("resourceType").disabled = false;
+    document.getElementById("resourceDescription").disabled = false;
+    document.getElementById("mainSubject").disabled = false;
+
+    document.getElementById("isNewVersion").value = "YES";
+    document.getElementById("resourceIdentifier").value = question.questionID;
 }
