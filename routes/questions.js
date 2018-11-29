@@ -23,6 +23,9 @@ var data;
 var translation;
 var currentUser = "";
 
+var languageTools = require('./tools/language_tools');
+var miscellaneousTools = require('./tools/miscellaneous');
+
 const mysqlConnection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -66,14 +69,14 @@ router.get('/', function (req, res, next) {
         if (err) throw err;
         //reinitialize array
         mainSubjects = [["Main subjects", "All regions"]];
-        con.query("SELECT SUBJECT, PROPERTY2 FROM subjects WHERE LANGUAGE=? AND PROPERTY1=?;", [getLanguage(req), "main"], function (err, rows) {
+        con.query("SELECT SUBJECT, PROPERTY2 FROM subjects WHERE LANGUAGE=? AND PROPERTY1=?;", [languageTools.getLanguage(req,i18n), "main"], function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
                 mainSubjects.push([rows[i].SUBJECT, rows[i].PROPERTY2]);
             }
         });
         allSubjects = ["All subjects"];
-        con.query("SELECT SUBJECT FROM subjects WHERE LANGUAGE=? AND PROPERTY1!=?;", [getLanguage(req), "main"], function (err, rows) {
+        con.query("SELECT SUBJECT FROM subjects WHERE LANGUAGE=? AND PROPERTY1!=?;", [languageTools.getLanguage(req,i18n), "main"], function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
                 allSubjects.push(rows[i].SUBJECT);
@@ -103,18 +106,18 @@ router.get('/', function (req, res, next) {
             "LEFT JOIN (SELECT DISTINCT IDENTIFIER_QUESTION, IDENTIFIER_SUBJECT FROM relation_question_subject WHERE ID IN (SELECT MAX(ID) FROM relation_question_subject GROUP BY IDENTIFIER_QUESTION)) t2" +
             " ON t1.IDENTIFIER = t2.IDENTIFIER_QUESTION " +
             " LEFT JOIN subjects t3 ON t2.IDENTIFIER_SUBJECT = t3.IDENTIFIER " +
-             "WHERE t1.LANGUAGE = '" + getLanguage(req) + "' LIMIT 500;";
+             "WHERE t1.LANGUAGE = '" + languageTools.getLanguage(req,i18n) + "' LIMIT 500;";
         con.query(sqlQuery, function (err, rows) {
             if (err) throw err;
             for (var i in rows) {
                 if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                     if (rows[i].QUESTION_TYPE == 0) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                     } else if (rows[i].QUESTION_TYPE == 1) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                     } else {
-                        var questionTypeString = intToResourceType(rows[i].QUESTION_TYPE);
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        var questionTypeString = miscellaneousTools.intToResourceType(rows[i].QUESTION_TYPE);
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                         question.mainSubject = rows[i].SUBJECT;
                         if (req.user == rows[i].OWNER_IDENTIFIER) {
                             question.editAvailable = true;
@@ -123,12 +126,12 @@ router.get('/', function (req, res, next) {
                     questionsArray.push(question);
                 } else {
                     if (rows[i].QUESTION_TYPE == 0) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                     } else if (rows[i].QUESTION_TYPE == 1){
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                     } else {
-                        var questionTypeString = intToResourceType(rows[i].QUESTION_TYPE);
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                        var questionTypeString = miscellaneousTools.intToResourceType(rows[i].QUESTION_TYPE);
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                         question.mainSubject = rows[i].SUBJECT;
                         if (req.user == rows[i].OWNER_IDENTIFIER) {
                             question.editAvailable = true;
@@ -159,8 +162,8 @@ router.get('/', function (req, res, next) {
                 }
             }
             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, test: ""};
-            translation = setTranslation();
+                language: languageTools.getLanguage(req,i18n), regions: regions, resourcesTypes: resourcesTypes, test: ""};
+            translation = languageTools.setTranslation(i18n);
             res.render('questions', {
                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
                 mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
@@ -248,8 +251,8 @@ router.post('/', upload.any(), function (req, res) {
                             }
 
                             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, testName: ""};
-                            translation = setTranslation();
+                                language: languageTools.getLanguage(req,i18n), regions: regions, resourcesTypes: resourcesTypes, testName: ""};
+                            translation = languageTools.setTranslation(i18n);
                             res.render('questions', {
                                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
                                 mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
@@ -288,10 +291,10 @@ router.post('/', upload.any(), function (req, res) {
             if (req.body.keyword != "") {
                 mcqQuery += " AND QUESTION LIKE ? AND question.LANGUAGE = ?";
                 mcqArg.push("%" + req.body.keyword + "%")
-                mcqArg.push(getLanguage(req));
+                mcqArg.push(languageTools.getLanguage(req,i18n));
             } else {
                 mcqQuery += " AND question.LANGUAGE = ?";
-                mcqArg.push(getLanguage(req));
+                mcqArg.push(languageTools.getLanguage(req,i18n));
             }
 
             mcqQuery += " LIMIT 500"
@@ -299,10 +302,10 @@ router.post('/', upload.any(), function (req, res) {
             mcqQuery = "SELECT question.*,subjects.SUBJECT FROM question ";
             mcqQuery += "WHERE QUESTION LIKE ? AND question.LANGUAGE = ?";
             mcqArg.push("%" + req.body.keyword + "%");
-            mcqArg.push(getLanguage(req));
+            mcqArg.push(languageTools.getLanguage(req,i18n));
         } else {
             mcqQuery += "WHERE question.LANGUAGE = ?";
-            mcqArg.push(getLanguage(req));
+            mcqArg.push(languageTools.getLanguage(req,i18n));
         }
 
 
@@ -327,11 +330,11 @@ router.post('/', upload.any(), function (req, res) {
                         if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                             if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "My questions") {
                                 if (rows[i].QUESTION_TYPE == 0) {
-                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                                 } else if (rows[i].QUESTION_TYPE == 1) {
-                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                                 } else if (rows[i].QUESTION_TYPE == 3) {
-                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                                    var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                                     question.mainSubject = rows[i].SUBJECT;
                                 }
                                 questionsArray.push(question);
@@ -340,11 +343,11 @@ router.post('/', upload.any(), function (req, res) {
                     } else {
                         if (!req.body.selectionFilter || req.body.selectionFilter == "All questions" || req.body.selectionFilter == "Other questions") {
                             if (rows[i].QUESTION_TYPE == 0) {
-                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                             } else if (rows[i].QUESTION_TYPE == 1) {
-                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                             } else if (rows[i].QUESTION_TYPE == 3) {
-                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                                var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Teaching Unit", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                                 question.mainSubject = rows[i].SUBJECT;
                             }
                             questionsArray.push(question);
@@ -384,8 +387,8 @@ router.post('/', upload.any(), function (req, res) {
                 }
 
                 data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                    language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, test: ""};
-                translation = setTranslation();
+                    language: languageTools.getLanguage(req,i18n), regions: regions, resourcesTypes: resourcesTypes, test: ""};
+                translation = languageTools.setTranslation(i18n);
                 res.render('questions', {
                     sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
                     mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
@@ -424,11 +427,11 @@ router.post('/', upload.any(), function (req, res) {
         var filename4 = "none";
         var imagename = "none";
         var filenames = [filename1, filename2, filename3, filename4, imagename];
-        filenames = fileTreatment(req.files[0], filenames, req);
-        filenames = fileTreatment(req.files[1], filenames, req);
-        filenames = fileTreatment(req.files[2], filenames, req);
-        filenames = fileTreatment(req.files[3], filenames, req);
-        filenames = fileTreatment(req.files[4], filenames, req);
+        filenames = miscellaneousTools.fileTreatment(req.files[0], filenames, req);
+        filenames = miscellaneousTools.fileTreatment(req.files[1], filenames, req);
+        filenames = miscellaneousTools.fileTreatment(req.files[2], filenames, req);
+        filenames = miscellaneousTools.fileTreatment(req.files[3], filenames, req);
+        filenames = miscellaneousTools.fileTreatment(req.files[4], filenames, req);
 
         //deal with other possibly empty fields
         var resourceTitle = "none";
@@ -446,7 +449,7 @@ router.post('/', upload.any(), function (req, res) {
         }
 
         var resource = [uid, equivalenceId, typeCode, resourceTitle, resourceDescription,
-            filenames[0], filenames[1], filenames[2], filenames[3], filenames[4], datetime, getLanguage(req), user];
+            filenames[0], filenames[1], filenames[2], filenames[3], filenames[4], datetime, languageTools.getLanguage(req,i18n), user];
         var sql = "INSERT INTO question (IDENTIFIER, EQUIVALENCE_ID, QUESTION_TYPE, QUESTION, OPTION0, OPTION1, OPTION2, OPTION3, OPTION4," +
             "IMAGE_PATH, MODIF_DATE, LANGUAGE, OWNER_IDENTIFIER) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
         mysqlConnection.query(sql, resource, function (err, result) {
@@ -471,8 +474,8 @@ router.post('/', upload.any(), function (req, res) {
         }
 
         data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-            language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, test: ""};
-        translation = setTranslation();
+            language: languageTools.getLanguage(req,i18n), regions: regions, resourcesTypes: resourcesTypes, test: ""};
+        translation = languageTools.setTranslation(i18n);
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
             mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
@@ -563,8 +566,8 @@ router.post('/', upload.any(), function (req, res) {
         }
 
         data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-            language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, test: ""};
-        translation = setTranslation();
+            language: languageTools.getLanguage(req,i18n), regions: regions, resourcesTypes: resourcesTypes, test: ""};
+        translation = languageTools.setTranslation(i18n);
         res.render('questions', {
             sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
             mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
@@ -584,12 +587,12 @@ router.post('/', upload.any(), function (req, res) {
             for (var i in rows) {
                 if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
                     if (rows[i].QUESTION_TYPE == 0) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                     } else if (rows[i].QUESTION_TYPE == 1) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                     } else {
-                        var questionTypeString = intToResourceType(rows[i].QUESTION_TYPE);
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
+                        var questionTypeString = miscellaneousTools.intToResourceType(rows[i].QUESTION_TYPE);
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
                         question.mainSubject = rows[i].SUBJECT;
                         if (req.user == rows[i].OWNER_IDENTIFIER) {
                             question.editAvailable = true;
@@ -598,12 +601,12 @@ router.post('/', upload.any(), function (req, res) {
                     questionsArray.push(question);
                 } else {
                     if (rows[i].QUESTION_TYPE == 0) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                     } else if (rows[i].QUESTION_TYPE == 1){
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                     } else {
-                        var questionTypeString = intToResourceType(rows[i].QUESTION_TYPE);
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
+                        var questionTypeString = miscellaneousTools.intToResourceType(rows[i].QUESTION_TYPE);
+                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
                         question.mainSubject = rows[i].SUBJECT;
                         if (req.user == rows[i].OWNER_IDENTIFIER) {
                             question.editAvailable = true;
@@ -676,8 +679,8 @@ router.post('/', upload.any(), function (req, res) {
             }
 
             data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                language: getLanguage(req), regions: regions, resourcesTypes: resourcesTypes, test: test};
-            translation = setTranslation();
+                language: languageTools.getLanguage(req,i18n), regions: regions, resourcesTypes: resourcesTypes, test: test};
+            translation = languageTools.setTranslation(i18n);
             res.render('questions', {
                 sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
                 mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
@@ -687,128 +690,5 @@ router.post('/', upload.any(), function (req, res) {
         res.redirect("/questions");
     }
 });
-
-function fileTreatment(file, filenames, req) {
-    if (file) {
-        if (file.fieldname == "filetoupload1") {
-            filenames[0] = file.filename + "___" + req.body.filename1.replace(" ", "_");
-            fs.rename("public/users_files/" + file.filename, "public/users_files/" + filenames[0], function (err) {
-                if (err) throw err;
-            });
-        } else if (file.fieldname == "filetoupload1") {
-            filenames[1] = file.filename + "___" + req.body.filename2.replace(" ", "_");
-            fs.rename("public/users_files/" + file.filename, "public/users_files/" + filenames[1], function (err) {
-                if (err) throw err;
-            });
-        } else if (file.fieldname == "filetoupload1") {
-            filenames[2] = file.filename + "___" + req.body.filename3.replace(" ", "_");
-            fs.rename("public/users_files/" + file.filename, "public/users_files/" + filenames[2], function (err) {
-                if (err) throw err;
-            });
-        } else if (file.fieldname == "filetoupload1") {
-            filenames[3] = file.filename + "___" + req.body.filename4.replace(" ", "_");
-            fs.rename("public/users_files/" + file.filename, "public/users_files/" + filenames[3], function (err) {
-                if (err) throw err;
-            });
-        } else if (file.fieldname == "imagefile") {
-            filenames[4] = file.filename.replace(" ", "_");
-            fs.rename("public/users_files/" + file.filename, "public/users_images/" + filenames[4], function (err) {
-                if (err) throw err;
-            });
-        }
-        return filenames;
-    } else {
-        return filenames;
-    }
-}
-
-function intToResourceType(typeCode) {
-    if (typeCode == 2) {
-        return "Questions Set";
-    } else if (typeCode == 3) {
-        return "Whole Teaching Sequence";
-    } else if (typeCode == 4) {
-        return "Evaluation / Exercise";
-    } else if (typeCode == 5) {
-        return "Activity";
-    } else {
-        return "Other";
-    }
-}
-
-function getLanguage(req) {
-    var language = i18n.getLocale();
-    if (language == "noinit") {
-        language = i18n.getLocale(req);
-    }
-    return language;
-}
-
-function setTranslation() {
-    var translation = {
-        sign_up: i18n.__('sign up'),
-        questions: i18n.__('questions'),
-        home: i18n.__('home'),
-        save_changes: i18n.__('save changes'),
-        search: i18n.__('search'),
-        question: i18n.__('question'),
-        answer1: i18n.__('answer %s',1),
-        answer2: i18n.__('answer %s',2),
-        answer3: i18n.__('answer %s',3),
-        answer4: i18n.__('answer %s',4),
-        answer5: i18n.__('answer %s',5),
-        answer6: i18n.__('answer %s',6),
-        answer7: i18n.__('answer %s',7),
-        answer8: i18n.__('answer %s',8),
-        answer9: i18n.__('answer %s',9),
-        answer10: i18n.__('answer %s',10),
-        question_type: i18n.__('question type'),
-        picture: i18n.__('picture'),
-        rating: i18n.__('rating'),
-        my_questions: i18n.__('my questions'),
-        load_more_questions: i18n.__('load more questions'),
-        type: i18n.__('type'),
-        average_rating: i18n.__('average rating'),
-        your_rating: i18n.__('your rating'),
-        submit_my_rating: i18n.__('submit my rating'),
-        select_question: i18n.__('select question')
-    };
-    return translation
-}
-
-function setAnswers(row) {
-    var answers = [];
-    if (row.OPTION0 != " ") {
-        answers.push(row.OPTION0);
-    }
-    if (row.OPTION1 != " ") {
-        answers.push(row.OPTION1);
-    }
-    if (row.OPTION2 != " ") {
-        answers.push(row.OPTION2);
-    }
-    if (row.OPTION3 != " ") {
-        answers.push(row.OPTION3);
-    }
-    if (row.OPTION4 != " ") {
-        answers.push(row.OPTION4);
-    }
-    if (row.OPTION5 != " ") {
-        answers.push(row.OPTION5);
-    }
-    if (row.OPTION6 != " ") {
-        answers.push(row.OPTION6);
-    }
-    if (row.OPTION7 != " ") {
-        answers.push(row.OPTION7);
-    }
-    if (row.OPTION8 != " ") {
-        answers.push(row.OPTION8);
-    }
-    if (row.OPTION9 != " ") {
-        answers.push(row.OPTION9);
-    }
-    return answers;
-}
 
 module.exports = router;
