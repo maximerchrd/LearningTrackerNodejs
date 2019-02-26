@@ -25,6 +25,9 @@ var currentUser = "";
 
 var languageTools = require('./tools/language_tools');
 var miscellaneousTools = require('./tools/miscellaneous');
+var getQuestionsResquest = require('./questions/getQuestionsRequest');
+var postQuestionsRequest = require('./questions/postQuestionsRequest');
+var Question = require('./questions/question');
 
 const mysqlConnection = mysql.createConnection({
     host: 'localhost',
@@ -33,235 +36,18 @@ const mysqlConnection = mysql.createConnection({
     database: 'koeko_website'
 });
 
-//define question object
-function Question(questionID, questionText, answers, nbCorrectAnswers, questionType, imageName, rating, userSelected) {
-    this.questionID = questionID;
-    this.questionText = questionText;
-    this.answers = answers;
-    this.nbCorrectAnswers = nbCorrectAnswers;
-    this.questionType = questionType;   // 0: multiple choice; 1: short answer, 2: test, 3: teaching sequence
-    this.imageName = imageName;
-    this.rating = rating;
-    this.userSelected = userSelected;
-    this.mainSubject = "";
-    this.editAvailable = false;
-    this.equivalenceId = -1;
-    this.version = -1;
-}
-
-
 /* GET questions page. */
 router.get('/', function (req, res, next) {
-    //reinit question array
-    questionsArray = [];
-
-
-    //do mysql stuffs
-
-    // First you need to create a connection to the db
-    const con = mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'koeko_website'
-    });
-    con.connect(function (err) {
-        if (err) throw err;
-        //reinitialize array
-        mainSubjects = [["Main subjects", "All regions"]];
-        con.query("SELECT SUBJECT, PROPERTY2 FROM subjects WHERE LANGUAGE=? AND PROPERTY1=?;", [languageTools.getLanguage(req,i18n), "main"], function (err, rows) {
-            if (err) throw err;
-            for (var i in rows) {
-                mainSubjects.push([rows[i].SUBJECT, rows[i].PROPERTY2]);
-            }
-        });
-        allSubjects = ["All subjects"];
-        con.query("SELECT SUBJECT FROM subjects WHERE LANGUAGE=? AND PROPERTY1!=?;", [languageTools.getLanguage(req,i18n), "main"], function (err, rows) {
-            if (err) throw err;
-            for (var i in rows) {
-                allSubjects.push(rows[i].SUBJECT);
-            }
-        });
-
-        //get the relations between questions and user
-        var ratingForResourceDictonary = {}
-        if (req.user) {
-            con.query("SELECT * FROM relation_resource_user WHERE IDENTIFIER_USER=?",req.user, function (err, rows) {
-                if (err) throw err;
-                for (var i in rows) {
-                    resourceIdsForUser.push(rows[i].IDENTIFIER_RESOURCE)
-                }
-            });
-
-            //get user rating
-            con.query("SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_USER=?",req.user, function (err, rows) {
-                if (err) throw err;
-                for (var i in rows) {
-                    ratingForResourceDictonary[rows[i].IDENTIFIER_RESOURCE] = rows[i].RATING
-                }
-            });
-        }
-
-        var sqlQuery = "SELECT t1.*,t3.SUBJECT FROM question t1 " +
-            "LEFT JOIN (SELECT DISTINCT IDENTIFIER_QUESTION, IDENTIFIER_SUBJECT FROM relation_question_subject WHERE ID IN (SELECT MAX(ID) FROM relation_question_subject GROUP BY IDENTIFIER_QUESTION)) t2" +
-            " ON t1.IDENTIFIER = t2.IDENTIFIER_QUESTION " +
-            " LEFT JOIN subjects t3 ON t2.IDENTIFIER_SUBJECT = t3.IDENTIFIER " +
-             "WHERE t1.LANGUAGE = '" + languageTools.getLanguage(req,i18n) + "' LIMIT 500;";
-        con.query(sqlQuery, function (err, rows) {
-            if (err) throw err;
-            for (var i in rows) {
-                if (req.user && resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
-                    if (rows[i].QUESTION_TYPE == 0) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
-                    } else if (rows[i].QUESTION_TYPE == 1) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
-                    } else {
-                        var questionTypeString = miscellaneousTools.intToResourceType(rows[i].QUESTION_TYPE);
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "selected.png");
-                        question.mainSubject = rows[i].SUBJECT;
-                        if (req.user == rows[i].OWNER_IDENTIFIER) {
-                            question.editAvailable = true;
-                        }
-                    }
-                    questionsArray.push(question);
-                } else {
-                    if (rows[i].QUESTION_TYPE == 0) {
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Multiple Choice", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
-                    } else if (rows[i].QUESTION_TYPE == 1){
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, "Short Answer", rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
-                    } else {
-                        var questionTypeString = miscellaneousTools.intToResourceType(rows[i].QUESTION_TYPE);
-                        var question = new Question(rows[i].IDENTIFIER, rows[i].QUESTION, miscellaneousTools.setAnswers(rows[i]), rows[i].NB_CORRECT_ANS, questionTypeString, rows[i].IMAGE_PATH, rows[i].RATING, "notselected.png");
-                        question.mainSubject = rows[i].SUBJECT;
-                        if (req.user == rows[i].OWNER_IDENTIFIER) {
-                            question.editAvailable = true;
-                        }
-                    }
-                    questionsArray.push(question);
-                }
-            }
-
-
-            if (req.user) {
-                signString = i18n.__('sign out');
-                signUrl = "signout";
-                currentUser = req.user;
-            } else {
-                signString = i18n.__('sign in');
-                signUrl = "signin";
-                currentUser = "";
-            }
-
-            //fill array containing the rating for each question using the dictionary as source
-            ratingForResource = [];
-            for (var i in questionsArray) {
-                if (questionsArray[i].questionID in ratingForResourceDictonary) {
-                    ratingForResource.push(ratingForResourceDictonary[questionsArray[i].questionID])
-                } else {
-                    ratingForResource.push(0)
-                }
-            }
-            data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                language: languageTools.getLanguage(req,i18n), regions: regions, resourcesTypes: resourcesTypes, test: ""};
-            translation = languageTools.setTranslation(i18n);
-            res.render('questions', {
-                sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
-                mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
-            });
-        });
-    });
+    getQuestionsResquest.getQuestions(mysqlConnection, mainSubjects, allSubjects, req, res, data, translation,
+        signString, signUrl, i18n, regions, resourcesTypes, questSelectedFilter, resourceIdsForUser);
 });
 
 router.post('/', upload.any(), function (req, res) {
-    console.log(req.body)
+    console.log(req.body);
 
     if (req.body.userRating) {
-        //save user rating
-        console.log("save user rating");
-        if (!req.user) {
-            res.render('signin', {sign_in_out: signString, sign_in_out_url: signUrl});
-        } else {
-            //do mysql stuffs
-
-            // First you need to create a connection to the db
-            const con = mysql.createConnection({
-                host: 'localhost',
-                user: 'root',
-                password: '',
-                database: 'koeko_website'
-            });
-
-
-            con.connect(function (err) {
-                if (err) throw err;
-
-                //first replace the user rating with the new rating
-                var sql = "REPLACE INTO relation_resource_user_rating (IDENTIFIER_RESOURCE, IDENTIFIER_USER, RATING, MODIF_DATE) " +
-                    "VALUES (?, ?, ?, ?)";
-                var sqlArgs = [req.body.questionRated, req.user, req.body.userRating, new Date().getTime()]
-
-                con.query(sql, sqlArgs, function (err, result) {
-                    if (err) throw err;
-                    console.log("Number of records inserted: " + result.affectedRows);
-
-                    //second calculate the new average rating for the question
-                    var sqlGetRatings = "SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_RESOURCE = ?"
-                    var sqlGetRatingsArgs = [req.body.questionRated]
-                    var newRating = 0.0
-
-                    con.query(sqlGetRatings, sqlGetRatingsArgs, function (err, rows) {
-                        if (err) throw err;
-
-                        for (i in rows) {
-                            newRating += parseFloat(rows[i].RATING)
-                        }
-                        newRating = newRating / rows.length
-
-
-                        //third insert the new rating for the question
-                        var sqlSetRating = ""
-                        var sqlSetRatingArgs = []
-
-                        sqlSetRating = "UPDATE question SET RATING = ? WHERE IDENTIFIER = ? "
-                        sqlSetRatingArgs = [newRating, req.body.questionRated]
-
-
-                        con.query(sqlSetRating, sqlSetRatingArgs, function (err, result) {
-                            if (err) throw err;
-
-                            if (req.user) {
-                                signString = i18n.__('sign out');
-                                signUrl = "signout"
-                                currentUser = req.user
-                            } else {
-                                signString = i18n.__('sign in');
-                                signUrl = "signin"
-                                currentUser = ""
-                            }
-
-                            var index = -1
-                            for (var i in questionsArray) {
-                                if (questionsArray[i].questionID == req.body.questionRated) {
-                                    index = i
-                                    questionsArray[i].rating = newRating
-                                }
-                            }
-                            if (index >= 0) {
-                                ratingForResource[index] = req.body.userRating
-                            }
-
-                            data = {questions: questionsArray, currentUser: currentUser, ratingForResource: ratingForResource,
-                                language: languageTools.getLanguage(req,i18n), regions: regions, resourcesTypes: resourcesTypes, testName: ""};
-                            translation = languageTools.setTranslation(i18n);
-                            res.render('questions', {
-                                sign_in_out: signString, sign_in_out_url: signUrl, translation: translation, data: data,
-                                mainSubjects: mainSubjects, allSubjects: allSubjects, questSelectedFilter: questSelectedFilter
-                            });
-                        });
-                    });
-                });
-            });
-        }
+        postQuestionsRequest.saveUserRating(mysqlConnection, mainSubjects, allSubjects, req, res, data, translation,
+            signString, signUrl, i18n, regions, resourcesTypes, questSelectedFilter);
     } else if (req.body.subjectFilter) {
         //handle search request
         console.log("search request");
@@ -312,18 +98,12 @@ router.post('/', upload.any(), function (req, res) {
         //do mysql stuffs
 
         // First you need to create a connection to the db
-        const con = mysql.createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: '',
-            database: 'koeko_website'
-        });
-        con.connect(function (err) {
+        mysqlConnection.connect(function (err) {
             if (err) throw err;
 
             questionsArray = [];
 
-            con.query(mcqQuery, mcqArg, function (err, rows) {
+            mysqlConnection.query(mcqQuery, mcqArg, function (err, rows) {
                 if (err) throw err;
                 for (var i in rows) {
                     if (resourceIdsForUser.indexOf(rows[i].IDENTIFIER) != -1) {
@@ -357,7 +137,7 @@ router.post('/', upload.any(), function (req, res) {
             });
 
             //get user rating
-            con.query("SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_USER=?",[req.user], function (err, rows) {
+            mysqlConnection.query("SELECT * FROM relation_resource_user_rating WHERE IDENTIFIER_USER=?",[req.user], function (err, rows) {
                 if (err) throw err;
 
                 var ratingForResourceDictonary = {}
@@ -504,20 +284,12 @@ router.post('/', upload.any(), function (req, res) {
         //do mysql stuffs
 
         // First you need to create a connection to the db
-        const con = mysql.createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: '',
-            database: 'koeko_website'
-        });
-
-
-        con.connect(function (err) {
+        mysqlConnection.connect(function (err) {
             if (err) throw err;
 
             if (questions.length > 0) {
                 var sql = "REPLACE INTO relation_resource_user (IDENTIFIER_RESOURCE, RESOURCE_TYPE, IDENTIFIER_USER) VALUES ?";
-                con.query(sql, [questions], function (err, result) {
+                mysqlConnection.query(sql, [questions], function (err, result) {
                     if (err) throw err;
                     console.log("Number of records inserted: " + result.affectedRows);
                 });
@@ -527,7 +299,7 @@ router.post('/', upload.any(), function (req, res) {
                 var i;
                 for (i = 0; i < questionsUnselected.length; i++) {
                     var sql = "DELETE FROM relation_resource_user WHERE IDENTIFIER_RESOURCE='" + questionsUnselected[i] + "' AND IDENTIFIER_USER='" + req.user + "';";
-                    con.query(sql, function (err, result) {
+                    mysqlConnection.query(sql, function (err, result) {
                         if (err) throw err;
                         console.log("Number of records deleted: " + result.affectedRows);
                     });
